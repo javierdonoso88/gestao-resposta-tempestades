@@ -596,7 +596,7 @@ export function ResultsOverlay({ faults, totalClients, kpi, agentLogs, commsMess
         <div className="flex items-center justify-between px-6 py-4 flex-shrink-0 mt-auto" style={{ borderTop: '1px solid var(--border)' }}>
           <div className="flex items-center gap-2">
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/SAP_2011_logo.svg/1280px-SAP_2011_logo.svg.png" alt="SAP" style={{ height: 13, opacity: 0.25 }} />
-            <span className="text-[11px] font-mono" style={{ color: 'var(--text-ghost)' }}>Storm Response Commander · Iberdrola Girona</span>
+            <span className="text-[11px] font-mono" style={{ color: 'var(--text-ghost)' }}>Storm Response Commander · EDP · Área Metropolitana de Lisboa</span>
           </div>
           <div className="flex items-center gap-2">
             <button
