@@ -305,13 +305,13 @@ function IncidentInfoModal({ onClose }: { onClose: () => void }) {
     u === m.urgencyCritical ? 'rgba(239,68,68,0.15)' : u === m.urgencyHigh ? 'rgba(249,115,22,0.15)' : u === m.urgencyMedium ? 'rgba(250,204,21,0.12)' : 'rgba(148,163,184,0.1)';
 
   const criticalSites = [
-    { id: 'TRF-002', site: 'CPD Ajuntament de Girona', type: m.siteDataCenter, battery: 30, urgency: m.urgencyCritical },
-    { id: 'TRF-003', site: 'Centro de Diálisis de Girona', type: m.siteHealth, battery: 60, urgency: m.urgencyCritical },
-    { id: 'TRF-004', site: 'EDAR Banyoles', type: m.siteWater, battery: 120, urgency: m.urgencyHigh },
-    { id: 'TRF-006', site: "Comissaria Mossos d'Esquadra Figueres", type: m.siteEmergency, battery: 180, urgency: m.urgencyHigh },
-    { id: 'TRF-001', site: 'Hospital de Figueres', type: m.siteHospital, battery: 240, urgency: m.urgencyMedium },
-    { id: 'TRF-007', site: 'Hospital Universitari de Santa Caterina', type: m.siteHospital, battery: 360, urgency: m.urgencyMedium },
-    { id: 'TRF-005', site: "Punt d'Atenció Continuada Olot", type: m.siteHospital, battery: 480, urgency: m.urgencyLow },
+    { id: 'TRF-002', site: 'Estação de Bombagem EPAL — Loures', type: m.siteWater, battery: 30, urgency: m.urgencyCritical },
+    { id: 'TRF-003', site: 'NephroCare — Clínica de Hemodiálise Almada', type: m.siteHealth, battery: 60, urgency: m.urgencyCritical },
+    { id: 'TRF-004', site: 'Hospital Garcia de Orta — Almada', type: m.siteHospital, battery: 120, urgency: m.urgencyHigh },
+    { id: 'TRF-006', site: 'Hospital Fernando Fonseca — Amadora', type: m.siteHospital, battery: 180, urgency: m.urgencyHigh },
+    { id: 'TRF-001', site: 'Hospital de Santa Maria', type: m.siteHospital, battery: 240, urgency: m.urgencyMedium },
+    { id: 'TRF-007', site: 'Quartel Bombeiros Voluntários de Setúbal', type: m.siteEmergency, battery: 360, urgency: m.urgencyMedium },
+    { id: 'TRF-005', site: 'Data Center — Zona Industrial de Sintra', type: m.siteDataCenter, battery: 480, urgency: m.urgencyLow },
   ];
 
   const tensions = [
@@ -348,7 +348,7 @@ function IncidentInfoModal({ onClose }: { onClose: () => void }) {
           <div className="rounded-lg p-4 flex flex-col gap-3" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}>
             <InfoSectionTitle>{m.summaryTitle}</InfoSectionTitle>
             <div className="grid grid-cols-3 gap-3">
-              <StatBox value="127.000" label={m.summaryClients} color="#ef4444" />
+              <StatBox value="143.000" label={m.summaryClients} color="#ef4444" />
               <StatBox value="47" label={m.summaryFaults} color="#f97316" />
               <StatBox value="7" label={m.summaryCritical} color="#facc15" />
             </div>
@@ -393,7 +393,7 @@ function IncidentInfoModal({ onClose }: { onClose: () => void }) {
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-lg p-3 flex flex-col gap-2" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}>
                 <span className="text-[10px] font-bold tracking-widest" style={{ color: '#22c55e' }}>{m.crewBases}</span>
-                {[{ base: 'Girona', n: 7 }, { base: 'Figueres', n: 4 }, { base: 'Olot', n: 3 }, { base: 'Lloret de Mar', n: 3 }, { base: 'Blanes', n: 3 }, { base: 'Banyoles', n: 2 }].map(b => (
+                {[{ base: 'Lisboa/Chelas', n: 7 }, { base: 'Sintra', n: 4 }, { base: 'Cascais', n: 3 }, { base: 'Almada', n: 3 }, { base: 'Setúbal', n: 3 }, { base: 'Loures', n: 2 }].map(b => (
                   <div key={b.base} className="flex items-center justify-between">
                     <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{b.base}</span>
                     <span className="text-[11px] font-mono font-bold" style={{ color: 'var(--text-dim)' }}>{b.n}</span>
@@ -422,9 +422,9 @@ function IncidentInfoModal({ onClose }: { onClose: () => void }) {
                   <p className="text-[11px] leading-relaxed" style={{ color: '#6d5acd' }}>{m.droliusBody}</p>
                   <div className="flex flex-col gap-1 mt-0.5">
                     {[
-                      { icon: '🔋', text: 'battery_check — confirma batería SAI restante' },
-                      { icon: '🗺️', text: 'zone_access — evalúa accesibilidad para brigada' },
-                      { icon: '🔍', text: 'damage_assessment — documenta daños en el activo' },
+                      { icon: '🔋', text: 'battery_check — confirma bateria UPS/SAI restante' },
+                      { icon: '🗺️', text: 'zone_access — avalia acessibilidade para brigada (EN9, Arrábida)' },
+                      { icon: '🔍', text: 'damage_assessment — documenta danos no ativo' },
                     ].map(mi => (
                       <div key={mi.text} className="flex items-start gap-1.5 text-[10px]" style={{ color: 'var(--text-dim)' }}>
                         <span className="flex-shrink-0" style={{ fontSize: '10px' }}>{mi.icon}</span>
