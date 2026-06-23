@@ -7,7 +7,7 @@ export const en: Translations = {
   hero: {
     badge: 'SAP AI CORE × SAP JOULE MULTI-AGENT',
     subtitle: 'Multi-agent AI system for real-time electrical incident management. Autonomous orchestration, reasoned decisions and live SAP integrations.',
-    location: 'EDP DISTRIBUIÇÃO · ÁREA METROPOLITANA DE LISBOA · STORM BEATRIZ',
+    location: 'EDP DISTRIBUIÇÃO · ÁREA METROPOLITANA DE LISBOA · STORM KRISTIN',
     cta: 'Open Simulator →',
     scroll: 'SCROLL',
   },
@@ -20,7 +20,7 @@ export const en: Translations = {
   challenge: {
     eyebrow: 'THE OPERATIONAL CHALLENGE',
     title: '47 simultaneous faults.', titleHighlight: 'Decisions in minutes.',
-    body: 'Storm Beatriz, with gusts of 120 km/h, hits the Área Metropolitana de Lisboa. Eucalyptus trees fall on MV lines in Sintra and Arrábida. The EPAL Loures pumping station — supplying 800,000 people — has 30 minutes of battery. Crews on the south bank face delays at the Ponte 25 de Abril. 143,000 customers without power. Every minute counts.',
+    body: 'Storm Kristin, with gusts of 120 km/h, hits the Área Metropolitana de Lisboa. Eucalyptus trees fall on MV lines in Sintra and Arrábida. The EPAL Loures pumping station — supplying 800,000 people — has 30 minutes of battery. Crews on the south bank face delays at the Ponte 25 de Abril. 143,000 customers without power. Every minute counts.',
     card1: 'Critical sites', card1Sub: 'Hospitals, dialysis, EPAL and CPD — limited battery, top priority',
     card2: 'Transformer faults', card2Sub: '7 active — specialist crew · 90–180 min repair',
     card3: 'MV cable faults', card3Sub: '18 active — eucalyptus on lines · 60–120 min',
@@ -59,7 +59,7 @@ export const en: Translations = {
   params: {
     header: 'PARAMETERS',
     incident: 'ACTIVE INCIDENT', moreInfo: 'more info',
-    incidentBody: 'Storm Beatriz — AML. 143K customers without power, 7 critical sites on limited battery. Configure parameters and run the multi-agent simulation.',
+    incidentBody: 'Storm Kristin — AML. 143K customers without power, 7 critical sites on limited battery. Configure parameters and run the multi-agent simulation.',
     droluisAvailable: 'Inspection robot on standby',
     droluisRunning: 'Inspection in progress…',
     sla: 'SLA Target', slaTip: 'Maximum committed time to restore supply. Affects prioritisation of critical sites and dispatch urgency.',
@@ -162,12 +162,12 @@ export const en: Translations = {
   },
   modal: {
     title: 'ACTIVE INCIDENT',
-    subtitle: '— Storm Beatriz · Área Metropolitana de Lisboa',
+    subtitle: '— Storm Kristin · Área Metropolitana de Lisboa',
     summaryTitle: 'Incident summary',
     summaryClients: 'customers without power',
     summaryFaults: 'active faults',
     summaryCritical: 'critical sites',
-    summaryBody: 'Storm Beatriz has simultaneously hit multiple areas of the AML with gusts of 120 km/h. Eucalyptus trees fall on MV overhead lines in Sintra and Arrábida. The EPAL Loures pumping station — supplying 800,000 people — has only 30 min of battery. Crews on the south bank face congestion at the Ponte 25 de Abril.',
+    summaryBody: 'Storm Kristin has simultaneously hit multiple areas of the AML with gusts of 120 km/h. Eucalyptus trees fall on MV overhead lines in Sintra and Arrábida. The EPAL Loures pumping station — supplying 800,000 people — has only 30 min of battery. Crews on the south bank face congestion at the Ponte 25 de Abril.',
     criticalTitle: 'Critical sites with UPS / battery',
     criticalSubtitle: 'Emergency power infrastructure that will run out if the grid is not restored in time.',
     faultTypesTitle: 'Fault types',

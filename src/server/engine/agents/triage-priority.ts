@@ -97,7 +97,7 @@ Tu misión tiene dos etapas:
    - EPAL Loures (agua para 800.000 personas) debe recibir rango 1 si batería < 60 min.
 Al finalizar ambas etapas llama a complete_assessment con el resumen ejecutivo.
 ${params.language === 'pt' ? 'Responde em Português Europeu.' : params.language === 'en' ? 'Respond in English.' : 'Responde en español.'} Sé analítico y operacional.`,
-    userMessage: `INFORME DE INCIDENTE — Área Metropolitana de Lisboa — Tempestade Beatriz
+    userMessage: `INFORME DE INCIDENTE — Área Metropolitana de Lisboa — Tempestade Kristin
 SLA objetivo: ${params.minuteSLA} min | Ventana tormenta 2: ${params.storm2Window}
 Piezas limitadas: ${params.limitedParts === 1 ? 'SÍ — solo 1 transformador disponible' : 'NO'}
 CONTEXTO: Red subterránea Lisboa (conmutables rápidos) + líneas MT aéreas Sintra/Arrábida (eucaliptos caídos)

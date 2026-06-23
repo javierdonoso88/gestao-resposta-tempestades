@@ -7,7 +7,7 @@ export const pt: Translations = {
   hero: {
     badge: 'SAP AI CORE × SAP JOULE MULTI-AGENT',
     subtitle: 'Sistema multi-agente de inteligência artificial para a gestão de incidentes elétricos em tempo real. Orquestração autónoma, decisões fundamentadas e integrações SAP em direto.',
-    location: 'EDP DISTRIBUIÇÃO · ÁREA METROPOLITANA DE LISBOA · TEMPESTADE BEATRIZ',
+    location: 'EDP DISTRIBUIÇÃO · ÁREA METROPOLITANA DE LISBOA · TEMPESTADE KRISTIN',
     cta: 'Abrir Simulador →',
     scroll: 'SCROLL',
   },
@@ -20,7 +20,7 @@ export const pt: Translations = {
   challenge: {
     eyebrow: 'O DESAFIO OPERACIONAL',
     title: '47 falhas simultâneas.', titleHighlight: 'Decisões em minutos.',
-    body: 'A Tempestade Beatriz, com rajadas de 120 km/h, atinge a Área Metropolitana de Lisboa. Eucaliptos caem sobre linhas MT em Sintra e na Arrábida. A estação de bombagem EPAL de Loures — que abastece 800.000 pessoas — está com 30 minutos de bateria. As brigadas da margem sul enfrentam congestionamento na Ponte 25 de Abril. 143.000 clientes sem fornecimento. Cada minuto conta.',
+    body: 'A Tempestade Kristin, com rajadas de 120 km/h, atinge a Área Metropolitana de Lisboa. Eucaliptos caem sobre linhas MT em Sintra e na Arrábida. A estação de bombagem EPAL de Loures — que abastece 800.000 pessoas — está com 30 minutos de bateria. As brigadas da margem sul enfrentam congestionamento na Ponte 25 de Abril. 143.000 clientes sem fornecimento. Cada minuto conta.',
     card1: 'Locais críticos', card1Sub: 'Hospitais, diálise, EPAL e CPD — bateria limitada, prioridade máxima',
     card2: 'Falhas de transformador', card2Sub: '7 ativas — brigada especializada · 90–180 min reparação',
     card3: 'Falhas de cabo MT', card3Sub: '18 ativas — eucaliptos sobre linhas · 60–120 min',
@@ -59,7 +59,7 @@ export const pt: Translations = {
   params: {
     header: 'PARÂMETROS',
     incident: 'INCIDENTE ATIVO', moreInfo: 'mais info',
-    incidentBody: 'Tempestade Beatriz — AML. 143K clientes sem fornecimento, 7 locais críticos com bateria limitada. Configure os parâmetros e execute a simulação multi-agente.',
+    incidentBody: 'Tempestade Kristin — AML. 143K clientes sem fornecimento, 7 locais críticos com bateria limitada. Configure os parâmetros e execute a simulação multi-agente.',
     droluisAvailable: 'Robô de inspeção em standby',
     droluisRunning: 'Inspeção em curso…',
     sla: 'SLA Objetivo', slaTip: 'Tempo máximo comprometido para restaurar o fornecimento. Afeta a priorização de locais críticos e a urgência do despacho.',
@@ -162,12 +162,12 @@ export const pt: Translations = {
   },
   modal: {
     title: 'INCIDENTE ATIVO',
-    subtitle: '— Tempestade Beatriz · Área Metropolitana de Lisboa',
+    subtitle: '— Tempestade Kristin · Área Metropolitana de Lisboa',
     summaryTitle: 'Resumo do incidente',
     summaryClients: 'clientes sem fornecimento',
     summaryFaults: 'falhas ativas',
     summaryCritical: 'locais críticos',
-    summaryBody: 'A Tempestade Beatriz atingiu simultaneamente múltiplas zonas da AML com rajadas de 120 km/h. Eucaliptos caem sobre linhas MT em Sintra e na Arrábida. A estação de bombagem EPAL de Loures — que abastece 800.000 pessoas — tem apenas 30 min de bateria. As brigadas da margem sul enfrentam atrasos pela Ponte 25 de Abril.',
+    summaryBody: 'A Tempestade Kristin atingiu simultaneamente múltiplas zonas da AML com rajadas de 120 km/h. Eucaliptos caem sobre linhas MT em Sintra e na Arrábida. A estação de bombagem EPAL de Loures — que abastece 800.000 pessoas — tem apenas 30 min de bateria. As brigadas da margem sul enfrentam atrasos pela Ponte 25 de Abril.',
     criticalTitle: 'Locais críticos com UPS / bateria',
     criticalSubtitle: 'Infraestruturas com fornecimento de emergência que se esgotará se a rede não for restaurada a tempo.',
     faultTypesTitle: 'Tipos de falha',

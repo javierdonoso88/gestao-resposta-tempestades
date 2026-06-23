@@ -110,7 +110,7 @@ Tu misión: redactar y enviar 3 comunicaciones obligatorias en este orden:
 3. send_regulatory: notificación técnica formal para ERSE (regulador energético PT) y ANPC (Proteção Civil) con datos del incidente${hadConflict ? '\nIMPORTANTE: Hay conflicto de recursos (material limitado). Menciónalo en la notificación regulatoria.' : ''}${criticalAtRisk.length > 0 ? `\nALERTA: ${criticalAtRisk.length} sitio(s) crítico(s) con batería bajo el umbral SLA. Especialmente EPAL Loures (afecta abastecimiento de agua a 800.000 personas). Menciónalo en la notificación a ERSE y ANPC.` : ''}
 Llama a send_sms, send_press_release y send_regulatory (en ese orden), luego complete_comms.
 ${params.language === 'pt' ? 'Responde em Português Europeu.' : params.language === 'en' ? 'Respond in English.' : 'Responde en español/portugués según el canal.'} Sé profesional y preciso.`,
-    userMessage: `SITUACIÓN ACTUAL DEL INCIDENTE — Área Metropolitana de Lisboa — Tempestade Beatriz
+    userMessage: `SITUACIÓN ACTUAL DEL INCIDENTE — Área Metropolitana de Lisboa — Tempestade Kristin
 
 Fallos totales      : ${state.faults.length}
 Restaurados telecon.: ${restoredFaults.length} (${restoredClients.toLocaleString()} clientes reconectados)
