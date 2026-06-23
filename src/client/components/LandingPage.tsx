@@ -41,7 +41,9 @@ function AgentCard({ label, system, desc, color }: { label: string; system: stri
 export function LandingPage({ onEnter }: Props) {
   const [vis, setVis] = useState(false);
   const [showThemePicker, setShowThemePicker] = useState(false);
+  const [showLangPicker, setShowLangPicker] = useState(false);
   const themePickerRef = useRef<HTMLDivElement>(null);
+  const langPickerRef = useRef<HTMLDivElement>(null);
   const { theme, setTheme } = useTheme();
   const { lang, setLang, cycleLang } = useLanguage();
   const t = useT();
@@ -61,6 +63,17 @@ export function LandingPage({ onEnter }: Props) {
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, [showThemePicker]);
+
+  useEffect(() => {
+    if (!showLangPicker) return;
+    function handleClick(e: MouseEvent) {
+      if (langPickerRef.current && !langPickerRef.current.contains(e.target as Node)) {
+        setShowLangPicker(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [showLangPicker]);
 
   const fade = (delay: number) =>
     `transition-all duration-700 ${vis ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}` +
@@ -89,17 +102,45 @@ export function LandingPage({ onEnter }: Props) {
         <span className="text-sm font-semibold" style={{ color: 'var(--text-ghost)', margin: '0 2px' }}>|</span>
         <span className="text-sm font-semibold tracking-wide" style={{ color: 'var(--text-muted)' }}>Storm Response Commander</span>
 
-        {/* Language selector */}
-        <select
-          value={lang}
-          onChange={e => setLang(e.target.value as 'es' | 'en' | 'pt')}
-          className="ml-auto flex items-center gap-1 px-2 h-7 rounded-lg text-xs font-bold"
-          style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', color: 'var(--accent)', cursor: 'pointer', outline: 'none' }}
-        >
-          <option value="es">🇪🇸 ES</option>
-          <option value="en">🇬🇧 EN</option>
-          <option value="pt">🇵🇹 PT</option>
-        </select>
+        {/* Language picker dropdown */}
+        <div className="ml-auto relative flex-shrink-0" ref={langPickerRef}>
+          <button
+            onClick={() => setShowLangPicker(v => !v)}
+            className="flex items-center gap-1.5 px-2.5 h-7 rounded-lg text-xs font-medium"
+            style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', color: 'var(--text-muted)', cursor: 'pointer' }}
+          >
+            <span>{lang === 'es' ? '🇪🇸' : lang === 'en' ? '🇬🇧' : '🇵🇹'}</span>
+            <span>{lang === 'es' ? 'ES' : lang === 'en' ? 'EN' : 'PT'}</span>
+            <svg width="8" height="5" viewBox="0 0 8 5" fill="currentColor"><path d="M0 0l4 5 4-5z"/></svg>
+          </button>
+          {showLangPicker && (
+            <div
+              className="absolute right-0 top-full mt-1 rounded-lg overflow-hidden z-[9000]"
+              style={{ background: 'var(--bg-panel)', border: '1px solid var(--border-accent)', boxShadow: '0 8px 24px rgba(0,0,0,0.2)', minWidth: 120 }}
+            >
+              {([
+                { value: 'es', icon: '🇪🇸', label: 'ES' },
+                { value: 'en', icon: '🇬🇧', label: 'EN' },
+                { value: 'pt', icon: '🇵🇹', label: 'PT' },
+              ] as { value: 'es' | 'en' | 'pt'; icon: string; label: string }[]).map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => { setLang(opt.value); setShowLangPicker(false); }}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-xs text-left transition-colors"
+                  style={{
+                    background: lang === opt.value ? 'var(--accent-subtle)' : 'transparent',
+                    color: lang === opt.value ? 'var(--accent)' : 'var(--text-secondary)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <span>{opt.icon}</span>
+                  <span className="font-medium">{opt.label}</span>
+                  {lang === opt.value && <span className="ml-auto opacity-70">✓</span>}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Theme picker */}
         <div className="relative flex-shrink-0" ref={themePickerRef}>
