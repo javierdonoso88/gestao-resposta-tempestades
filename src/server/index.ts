@@ -21,7 +21,7 @@ if (isProd) {
 }
 
 app.listen(PORT, () => {
-  console.log(`Storm-Response Commander server running on port ${PORT}`);
+  console.log(`EDP Storm Response Management server running on port ${PORT}`);
   if (isProd) {
     console.log(`Serving client from dist/client/`);
   }

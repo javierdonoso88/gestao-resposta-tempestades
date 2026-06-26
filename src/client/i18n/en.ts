@@ -52,7 +52,7 @@ export const en: Translations = {
     footer: 'SAP BTP Cloud Foundry · SAP AI Core · SAP Joule',
   },
   app: {
-    title: 'Storm Response Commander',
+    title: 'Storm Response Management',
     standby: 'Standby', running: 'Running', done: '✓ Completed',
     report: 'View Report', window: 'WINDOW',
   },
