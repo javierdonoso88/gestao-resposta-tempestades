@@ -1,55 +1,55 @@
-# ⚡ Storm Response Commander
+# ⚡ EDP Storm Response Commander
 
-Sistema multi-agente de IA para la simulación de respuesta a incidentes eléctricos por tormenta. Modela la operativa real de Iberdrola en las Comarques de Girona: 47 fallos activos, 22 brigadas, sitios críticos con batería y ventana de segunda tormenta.
+Multi-agent AI simulation system for storm-driven electrical incident response. Models the real-world operations of EDP Distribuição in the Área Metropolitana de Lisboa: Storm Kristin with 120 km/h gusts, 47 active faults, 22 field crews across 6 bases, critical sites on limited battery, and eucalyptus trees down on MV overhead lines in Sintra and Arrábida.
 
-**Demo en vivo:** [storm-response-commander.cfapps.eu10.hana.ondemand.com](https://storm-response-commander.cfapps.eu10.hana.ondemand.com)
-
----
-
-## Qué hace
-
-Al abrir la aplicación se muestra una **pantalla de presentación** con el caso de uso, las métricas clave del escenario y la arquitectura multi-agente. Desde ahí se accede al simulador interactivo, con navegación de vuelta a la landing en cualquier momento desde el botón "Inicio" del header.
-
-El header incluye un **desplegable de tema** con tres opciones: **Oscuro** (navy/cyan), **SAP Joule** (blanco-gris, acento púrpura `#6d28d9`) e **Iberdrola** (verde-claro, acento verde `#00a651`). La preferencia se persiste en `localStorage`.
-
-Un **selector de idioma** (🌐 ES / EN) permite cambiar entre español e inglés en tiempo real. El idioma afecta a:
-- Toda la UI estática (landing, simulador, modal de incidente, informe ejecutivo y PDF descargable)
-- El contenido generado por los agentes IA (logs CoT, acciones SAP, comunicaciones)
-- Los mensajes de acción de cada sistema SAP integrado
-- Los KPIs del informe (labels, grades, badges de urgencia)
-
-La preferencia se persiste en `localStorage`.
-
-Al iniciar una simulación, un orquestador SAP AI Core coordina 5 agentes especializados que razonan sobre el escenario en tiempo real:
-
-| Fase | Agentes | Modo |
-|------|---------|------|
-| 1 — Evaluación | Technician Briefing Agent · Remote Restoration Scada Agent | Paralelo |
-| 2 — Ejecución | Service Dispatcher Agent → Resource Capacity Shortage Agent → Communications Insight Agent | Secuencial |
-
-Cada agente recibe el estado del escenario, usa herramientas concretas para tomar decisiones (conmutar fallos, despachar brigadas, asignar material, enviar comunicaciones) y emite eventos SSE que actualizan el mapa, los logs y los KPIs en tiempo real.
-
-Al finalizar, aparece automáticamente un **Resumen Ejecutivo** con:
-- KPIs visuales con gauges circulares SVG (SLA, Seguridad, Eficiencia operativa)
-- Indicadores de tiempo (TIEPI — minutos medios de interrupción ponderados por clientes, MTTR — tiempo medio de reposición de fallos atendidos)
-- Indicadores operativos: clientes restaurados, fallos atendidos, sitios críticos cubiertos, acciones pendientes
-- KPIs de integración SAP: sistemas tocados, órdenes FSM, conmutaciones AIN, materiales IBP, mensajes CX, activos S/4HANA, misiones Drolius
-- Resumen narrativo del orquestador (texto CoT limpio de markdown)
-- Acciones pendientes con recomendaciones de mitigación priorizadas
-
-Los KPIs del panel lateral muestran `—` hasta que finaliza la simulación (sin valor inicial engañoso).
-
-El informe puede cerrarse y reabrirse mediante el botón **"Ver Informe"** del header (visible tras completar la simulación). Al lanzar una nueva simulación el botón desaparece hasta que finalice. Desde el footer del informe se puede **descargar como PDF** con un clic — los estilos de impresión ocultan el resto de la UI y preservan los colores del dashboard.
+**Live demo:** [edp-storm-response.cfapps.eu10.hana.ondemand.com](https://edp-storm-response.cfapps.eu10.hana.ondemand.com)
 
 ---
 
-## Arquitectura
+## What it does
+
+Opening the app shows a **landing page** with the use case, key scenario metrics, and the multi-agent architecture. From there you enter the interactive simulator, with a back-to-landing button in the header at any time.
+
+The header includes a **theme dropdown** with three options: **Dark** (navy/cyan), **SAP Joule** (light grey, purple `#6d28d9` accent), and **EDP** (light green, `#00a651` accent). The preference is persisted in `localStorage`.
+
+A **language selector** (🇪🇸 ES / 🇬🇧 EN / 🇵🇹 PT) switches between Spanish, English, and Portuguese in real time. The language affects:
+- All static UI (landing, simulator, incident modal, executive report and downloadable PDF)
+- AI-generated content (CoT logs, SAP action messages, communications)
+- SAP system action messages from each agent
+- KPI labels, grades, and urgency badges in the report
+
+The preference is persisted in `localStorage`.
+
+When a simulation starts, an SAP AI Core orchestrator coordinates 5 specialised agents that reason over the scenario in real time:
+
+| Phase | Agents | Mode |
+|-------|--------|------|
+| 1 — Assessment | Technician Briefing Agent · Remote Restoration Scada Agent | Parallel |
+| 2 — Execution | Service Dispatcher Agent → Resource Capacity Shortage Agent → Communications Insight Agent | Sequential |
+
+Each agent receives the scenario state, uses concrete tools to make decisions (switch faults, dispatch crews, allocate materials, send communications), and emits SSE events that update the map, logs, and KPIs in real time.
+
+On completion, an **Executive Summary** appears automatically with:
+- Visual KPI gauges (SLA, Safety, Operational Efficiency)
+- Time indicators (TIEPI — client-weighted average interruption minutes, MTTR — mean repair time for attended faults)
+- Operational indicators: customers restored, faults handled, critical sites covered, pending actions
+- SAP integration KPIs: systems touched, FSM work orders, AIN switches, IBP materials, CX messages, S/4HANA assets, Drolius missions
+- Orchestrator narrative (clean CoT text, markdown rendered)
+- Pending actions with prioritised mitigation recommendations
+
+Sidebar KPIs show `—` until the simulation completes (no misleading initial values).
+
+The report can be closed and reopened via the **"View Report"** button in the header (visible after simulation completes). Starting a new simulation hides the button until it finishes. The report footer includes a **Download PDF** button — print styles hide the rest of the UI and preserve dashboard colours.
+
+---
+
+## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │  React Frontend                                                  │
 │  LandingPage · MapPanel · LogPanel · GanttPanel                  │
-│  ParametersPanel · StatsPanel (Acciones SAP + Comunicaciones)    │
+│  ParametersPanel · StatsPanel (SAP Actions + Communications)     │
 └────────────────────┬────────────────────────────────────────────┘
                      │  SSE /api/simulate
 ┌────────────────────▼────────────────────────────────────────────┐
@@ -58,19 +58,19 @@ El informe puede cerrarse y reabrirse mediante el botón **"Ver Informe"** del h
 │  ┌─────────────────────────────────────────────────────────┐    │
 │  │  Orchestrator (Claude)                                   │    │
 │  │  invoke_triage_priority ─┐                              │    │
-│  │  invoke_rerouting ────────┤ Promise.all (Fase 1)        │    │
+│  │  invoke_rerouting ────────┤ Promise.all (Phase 1)       │    │
 │  │  invoke_crew_dispatch → invoke_resource → invoke_comms  │    │
 │  │  finalize                                               │    │
 │  └──────────────────────────┬──────────────────────────────┘    │
 │                              │ runAgent()                        │
-│  ┌──────────────────┐  ┌───────────────────┐                    │
-│  │ Technician Briefing  │  │Remote Restoration  │                    │
-│  │ Agent                │  │Scada Agent         │                    │
-│  └──────────────────────┘  └────────────────────┘                    │
-│  ┌─────────────────────┐  ┌──────────────────────────┐  ┌─────────────────────────┐  │
-│  │ Service Dispatcher  │  │ Resource Capacity Shortage│  │ Communications Insight  │  │
-│  │ Agent               │  │ Agent                    │  │ Agent                   │  │
-│  └─────────────────────┘  └──────────────────────────┘  └─────────────────────────┘  │
+│  ┌──────────────────────┐  ┌─────────────────────────┐         │
+│  │ Technician Briefing  │  │ Remote Restoration SCADA │         │
+│  │ Agent                │  │ Agent                    │         │
+│  └──────────────────────┘  └─────────────────────────┘         │
+│  ┌──────────────────────┐  ┌──────────────────────┐  ┌───────────────────────┐  │
+│  │ Service Dispatcher   │  │ Resource Capacity    │  │ Communications Insight│  │
+│  │ Agent                │  │ Shortage Agent       │  │ Agent                 │  │
+│  └──────────────────────┘  └──────────────────────┘  └───────────────────────┘  │
 │                                                                  │
 │  ┌───────────────────────────────────────────────────────────┐  │
 │  │  SAP AI Core — Anthropic Claude Sonnet 4.6                │  │
@@ -79,46 +79,51 @@ El informe puede cerrarse y reabrirse mediante el botón **"Ver Informe"** del h
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-Ver [docs/architecture.md](docs/architecture.md) para el detalle técnico completo.
+See [docs/architecture.md](docs/architecture.md) for full technical detail.
 
 ---
 
-## Escenario base
+## Base scenario
 
-- **127.000 clientes** — Comarques de Girona
-- **47 fallos activos**: 22 conmutables (telecontrol), 7 transformadores, 18 cables
-- **7 sitios críticos**: hospitales, CPDs, diálisis, depuradoras, comisarías — con batería limitada
-- **22 brigadas** en 6 bases: Girona, Figueres, Olot, Banyoles, Lloret, Blanes
-- **Drolius** — robot de inspección ANYbotics, desplegable desde Service Dispatcher Agent para reconocimiento previo
-- **Parámetros configurables**: SLA, brigadas disponibles, inventario limitado, ventana de segunda tormenta
+- **143,000 customers** — Área Metropolitana de Lisboa
+- **47 active faults**: 22 switchable (SCADA remote), 7 transformers, 18 MV cables
+- **7 critical sites**: hospitals, dialysis centre, EPAL pumping station (water supply for 800K people), data centre, fire station — all on limited battery
+- **22 field crews** across 6 bases: Lisboa/Chelas, Sintra, Cascais, Loures, Almada, Setúbal
+- **Drolius** — ANYbotics inspection robot, deployable by Service Dispatcher Agent for pre-visit reconnaissance in hard-to-access areas (Sintra EN9, Arrábida)
+- **Configurable parameters**: SLA target, available crews, limited parts inventory, second storm window
+
+**Unique scenario tensions:**
+1. **EPAL Loures** — 30 min battery, water supply for 800,000 people. Absolute rank-1 priority.
+2. **Transformer shortage** (limited parts ON) — 1 transformer for 7 critical faults in Sintra and Arrábida.
+3. **South bank isolation** — Almada and Setúbal crews face +20 min ETA due to Ponte 25 de Abril congestion.
+4. **Sintra access blocked** — Eucalyptus trees on EN9/EN247. Dispatcher must use Drolius before sending crews.
 
 ---
 
-## Tecnología
+## Technology
 
-| Capa | Stack |
-|------|-------|
+| Layer | Stack |
+|-------|-------|
 | Frontend | React 18, TypeScript, Vite, Tailwind CSS, React-Leaflet, CSS custom properties |
 | Backend | Node.js, Express, SSE |
-| IA | SAP AI Core — Claude Sonnet 4.6 (orchestrator) · Haiku 4.5 (sub-agentes) |
-| SDK | `@anthropic-ai/sdk` con adaptador custom para AI Core |
-| Modelos | Sonnet 4.6 (orchestrator) · Haiku 4.5 (sub-agentes) |
-| i18n | Español / Inglés — UI + contenido IA, selector persistido en localStorage |
+| AI | SAP AI Core — Claude Sonnet 4.6 (orchestrator) · Haiku 4.5 (sub-agents) |
+| SDK | `@anthropic-ai/sdk` with custom adapter for AI Core |
+| i18n | Spanish / English / Portuguese — UI + AI content, selector persisted in localStorage |
 | Deploy | SAP BTP Cloud Foundry (`nodejs_buildpack`) |
 
 ---
 
-## Instalación local
+## Local setup
 
-**Requisitos**: Node.js ≥ 18, acceso a SAP AI Core
+**Requirements**: Node.js ≥ 18, SAP AI Core access
 
 ```bash
-git clone https://github.com/javierdonoso88/storm-response-commander
-cd storm-response-commander
+git clone https://github.com/javierdonoso88/EDP-Storm-Response
+cd EDP-Storm-Response
 npm install
 ```
 
-Configura las variables de entorno (opcional — hay valores por defecto para el tenant de demo):
+Configure environment variables (optional — demo tenant defaults are built in):
 
 ```bash
 export AICORE_CLIENT_ID=...
@@ -129,90 +134,91 @@ export AICORE_DEPLOYMENT_ID=...
 export AICORE_RESOURCE_GROUP=default
 ```
 
-Arranca en modo desarrollo:
+Start in development mode:
 
 ```bash
 npm run dev
-# Cliente: http://localhost:5173
-# Servidor: http://localhost:3001
+# Client: http://localhost:5173
+# Server: http://localhost:3001
 ```
 
 ---
 
 ## Scripts
 
-| Comando | Descripción |
+| Command | Description |
 |---------|-------------|
-| `npm run dev` | Servidor + cliente en modo desarrollo (hot reload) |
-| `npm run build` | Compila TypeScript + Vite para producción |
-| `npm start` | Arranca el servidor de producción |
+| `npm run dev` | Server + client in development mode (hot reload) |
+| `npm run build` | Compile TypeScript + Vite for production |
+| `npm start` | Start the production server |
 
 ---
 
-## Despliegue en Cloud Foundry
+## Cloud Foundry deployment
 
 ```bash
 cf push
 ```
 
-El buildpack ejecuta `heroku-postbuild` → `npm run build` automáticamente durante el staging, por lo que no es necesario compilar localmente antes de desplegar.
+The buildpack runs `heroku-postbuild` → `npm run build` automatically during staging, so no local build is needed before deploying.
 
-Variables de entorno en CF:
+Environment variables in CF:
 
 ```bash
-cf set-env storm-response-commander AICORE_CLIENT_ID ...
-cf set-env storm-response-commander AICORE_CLIENT_SECRET ...
-cf set-env storm-response-commander AICORE_TOKEN_URL ...
-cf set-env storm-response-commander AICORE_DEPLOYMENT_ID ...        # deployment Sonnet (orchestrator)
-cf set-env storm-response-commander AICORE_HAIKU_DEPLOYMENT_ID ...  # deployment Haiku (sub-agentes)
-cf restage storm-response-commander
+cf set-env edp-storm-response AICORE_CLIENT_ID ...
+cf set-env edp-storm-response AICORE_CLIENT_SECRET ...
+cf set-env edp-storm-response AICORE_TOKEN_URL ...
+cf set-env edp-storm-response AICORE_DEPLOYMENT_ID ...        # Sonnet deployment (orchestrator)
+cf set-env edp-storm-response AICORE_HAIKU_DEPLOYMENT_ID ...  # Haiku deployment (sub-agents)
+cf restage edp-storm-response
 ```
 
 ---
 
-## Estructura del proyecto
+## Project structure
 
 ```
 src/
 ├── client/
-│   ├── App.tsx                  # Layout principal, navegación landing↔simulador, selector idioma/tema
+│   ├── App.tsx                  # Main layout, landing↔simulator nav, language/theme selectors
 │   ├── contexts/
-│   │   ├── ThemeContext.tsx      # Tema oscuro / Joule / Iberdrola — CSS vars + localStorage
-│   │   └── LanguageContext.tsx   # Idioma ES/EN — localStorage
+│   │   ├── ThemeContext.tsx      # Dark / Joule / EDP themes — CSS vars + localStorage
+│   │   └── LanguageContext.tsx   # ES/EN/PT language — localStorage, cycleLang()
 │   ├── i18n/
-│   │   ├── es.ts                # ~270 strings en español
-│   │   ├── en.ts                # ~270 strings en inglés
-│   │   └── index.ts             # Hook useT() — devuelve traducciones del idioma activo
-│   ├── hooks/useSimulation.ts   # Gestión de SSE y estado de simulación
+│   │   ├── es.ts                # ~270 strings in Spanish
+│   │   ├── en.ts                # ~270 strings in English
+│   │   ├── pt.ts                # ~270 strings in Portuguese (European)
+│   │   └── index.ts             # useT() hook — returns translations for the active language
+│   ├── hooks/useSimulation.ts   # SSE handling and simulation state management
 │   ├── components/
-│   │   ├── LandingPage.tsx      # Pantalla inicial: caso de uso + arquitectura multi-agente
-│   │   ├── MapPanel.tsx         # Mapa de Girona con nodos de fallo
-│   │   ├── LogPanel.tsx         # Logs CoT en tiempo real por agente
-│   │   ├── ParametersPanel.tsx  # Controles + KPIs (muestra — hasta completar simulación)
-│   │   ├── GanttPanel.tsx       # Diagrama N8N de orquestación (HTML+SVG, compatible Safari)
-│   │   ├── StatsPanel.tsx       # Acciones SAP (arriba) + Comunicaciones (abajo)
-│   │   └── ResultsOverlay.tsx   # Resumen ejecutivo final: KPIs, SAP, análisis orquestador, acciones pendientes
-│   └── data/mapData.ts          # Posiciones geográficas
+│   │   ├── LandingPage.tsx      # Landing screen: use case + multi-agent architecture
+│   │   ├── MapPanel.tsx         # AML Lisboa map with fault nodes
+│   │   ├── LogPanel.tsx         # Real-time CoT logs per agent
+│   │   ├── ParametersPanel.tsx  # Controls + KPIs (shows — until simulation completes)
+│   │   ├── GanttPanel.tsx       # Orchestration flow diagram (HTML+SVG, Safari-compatible)
+│   │   ├── StatsPanel.tsx       # SAP Actions (top) + Communications (bottom)
+│   │   └── ResultsOverlay.tsx   # Executive summary: KPIs, SAP integration, analysis, pending actions
+│   └── data/mapData.ts          # GPS coordinates and network topology for AML Lisboa
 └── server/
     ├── index.ts                 # Express server
-    ├── routes/simulation.ts     # Endpoint SSE /api/simulate
+    ├── routes/simulation.ts     # SSE endpoint /api/simulate
     └── engine/
-        ├── types.ts             # Tipos: Fault, Crew, SimEvent, SimParams (incluye language)…
-        ├── scenario.ts          # Escenario base y buildScenario()
-        ├── anthropicClient.ts   # Adaptador SAP AI Core + SSE transformer
-        ├── agentRunner.ts       # Bucle genérico de tool-use con streaming + inyección de idioma
-        ├── orchestrator.ts      # Agente orquestador + ejecución paralela Fase 1
+        ├── types.ts             # Types: Fault, Crew, SimEvent, SimParams (includes language)…
+        ├── scenario.ts          # Base scenario and buildScenario()
+        ├── anthropicClient.ts   # SAP AI Core adapter + SSE transformer
+        ├── agentRunner.ts       # Generic tool-use loop with streaming + language injection
+        ├── orchestrator.ts      # Orchestrator agent + Phase 1 parallel execution
         └── agents/
-            ├── triage-priority.ts  # Clasificación de fallos + rankeado por urgencia
-            ├── rerouting.ts        # Restauración remota por telecontrol
-            ├── crew-dispatch.ts    # Asignación de brigadas
-            ├── resource.ts         # Inventario + conflictos de material
-            └── comms.ts            # Communications Insight Agent: SMS · Prensa · Regulatorio
+            ├── triage-priority.ts  # Fault classification + urgency ranking
+            ├── rerouting.ts        # Remote SCADA restoration
+            ├── crew-dispatch.ts    # Crew assignment + Drolius deployment
+            ├── resource.ts         # Inventory management + conflict detection
+            └── comms.ts            # SMS · Press release · ERSE/ANPC regulatory notification
 ```
 
 ---
 
-## Documentación adicional
+## Additional documentation
 
-- [Arquitectura técnica](docs/architecture.md) — SSE, adaptador AI Core, modelo de streaming
-- [Referencia de agentes](docs/agents.md) — Herramientas, prompts y decisiones de cada agente
+- [Technical architecture](docs/architecture.md) — SSE, AI Core adapter, streaming model
+- [Agent reference](docs/agents.md) — Tools, prompts, and decisions for each agent

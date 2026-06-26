@@ -1,11 +1,11 @@
-# Referencia de agentes
+# Agent Reference
 
-Todos los agentes comparten la misma interfaz de entrada/salida y usan el bucle genérico de `agentRunner.ts`. El estado del escenario (`ScenarioState`) se pasa por referencia — las herramientas lo mutan directamente.
+All agents share the same input/output interface and use the generic loop in `agentRunner.ts`. The scenario state (`ScenarioState`) is passed by reference — tools mutate it directly.
 
-Cada agente emite eventos `action` vinculados a su sistema SAP de integración. Estos eventos alimentan el panel **Acciones SAP** del frontend en tiempo real. Solo el agente **Communications Insight Agent** puede emitir eventos `comms` (SMS, prensa, regulatorio).
+Each agent emits `action` events tied to its SAP integration system. These events feed the **SAP Actions** panel in the frontend in real time. Only the **Communications Insight Agent** can emit `comms` events (SMS, press release, regulatory).
 
-| Agente | ID interno | Sistema SAP |
-|--------|-----------|------------|
+| Agent | Internal ID | SAP System |
+|-------|------------|------------|
 | Asset and Services Assistant | `orchestrator` | SAP AI Core Orchestration |
 | Technician Briefing Agent | `triage-priority` | SAP S/4HANA Asset Management + Event Mesh |
 | Remote Restoration Scada Agent | `rerouting` | SAP Asset Intelligence Network |
@@ -17,228 +17,231 @@ Cada agente emite eventos `action` vinculados a su sistema SAP de integración. 
 
 ## Orchestrator
 
-**Archivo**: `src/server/engine/orchestrator.ts`
+**File**: `src/server/engine/orchestrator.ts`
 
-El orquestador es un agente Claude con herramientas que invocan a los demás agentes. No usa `runAgent` sino un bucle propio para poder detectar y ejecutar en paralelo la Fase 1.
+The orchestrator is a Claude agent with tools that invoke the other agents. It does not use `runAgent` — it has its own loop to detect and run Phase 1 in parallel.
 
-**Protocolo**:
+**Protocol**:
 ```
-Fase 1 (paralelo)  : invoke_triage_priority + invoke_rerouting
-Fase 2 (secuencial): invoke_crew_dispatch → invoke_resource → invoke_comms
-Cierre             : finalize
+Phase 1 (parallel)  : invoke_triage_priority + invoke_rerouting
+Phase 2 (sequential): invoke_crew_dispatch → invoke_resource → invoke_comms
+Close               : finalize
 ```
 
-**Detección de paralelismo**: si todos los `tool_use` del turno pertenecen a `phase1Tools = {'invoke_triage_priority', 'invoke_rerouting'}`, se ejecutan con `Promise.all`. En cualquier otro caso, loop secuencial.
+**Parallelism detection**: if all `tool_use` blocks in a turn belong to `phase1Tools = {'invoke_triage_priority', 'invoke_rerouting'}`, they are executed with `Promise.all`. Otherwise, sequential loop.
 
-**Configuración del modelo**: `max_tokens: 8192` (aumentado desde 4096 para evitar que la Fase 2 se omita cuando Claude genera razonamiento largo tras los resultados de la Fase 1). El system prompt prohíbe explícitamente el análisis extendido entre fases.
+**Model configuration**: `max_tokens: 8192` (increased from 4096 to prevent Phase 2 being skipped when Claude generates long reasoning after Phase 1 results). The system prompt explicitly prohibits extended analysis between phases.
 
-**Herramientas**:
+**Tools**:
 
-| Herramienta | Descripción |
-|-------------|-------------|
-| `invoke_triage_priority` | Ejecuta el agente Technician Briefing Agent |
-| `invoke_rerouting` | Ejecuta el agente Remote Restoration Scada Agent |
-| `invoke_crew_dispatch` | Ejecuta el agente Service Dispatcher Agent |
-| `invoke_resource` | Ejecuta el agente Resource Capacity Shortage Agent |
-| `invoke_comms` | Ejecuta el agente Communications Insight Agent |
-| `finalize` | Calcula KPIs (SLA, Seguridad, Eficiencia, TIEPI, MTTR) y emite `kpi` + `done` |
+| Tool | Description |
+|------|-------------|
+| `invoke_triage_priority` | Runs the Technician Briefing Agent |
+| `invoke_rerouting` | Runs the Remote Restoration SCADA Agent |
+| `invoke_crew_dispatch` | Runs the Service Dispatcher Agent |
+| `invoke_resource` | Runs the Resource Capacity Shortage Agent |
+| `invoke_comms` | Runs the Communications Insight Agent |
+| `finalize` | Calculates KPIs (SLA, Safety, Efficiency, TIEPI, MTTR) and emits `kpi` + `done` |
 
-**Eventos `action` emitidos**:
-- Al iniciar: `SAP AI Core Orchestration` — incidente registrado con recuento de fallos y clientes
-- Al cerrar (`finalize`): `SAP AI Core Orchestration` — ciclo finalizado con KPIs calculados
+**`action` events emitted**:
+- On start: `SAP AI Core Orchestration` — incident registered with fault count and affected customers
+- On close (`finalize`): `SAP AI Core Orchestration` — cycle closed with calculated KPIs
 
 ---
 
 ## Technician Briefing Agent
 
-**Archivo**: `src/server/engine/agents/triage-priority.ts`  
-**Entrada**: lista completa de los 47 fallos (ID, tipo, zona, clientes, sitio crítico, batería) + lista de fallos físicos  
-**Propósito**: clasificar todos los fallos por severidad y rankear los físicos por urgencia para Service Dispatcher Agent
+**File**: `src/server/engine/agents/triage-priority.ts`  
+**Input**: full list of 47 faults (ID, type, zone, customers, critical site, battery) + list of physical faults  
+**Purpose**: classify all faults by severity and rank physical ones by urgency for the Service Dispatcher Agent
 
-**Etapas internas**:
-1. **Triage** — `classify_fault` para cada uno de los 47 fallos
-2. **Priority** — `set_priority` para cada fallo físico (transformadores y cables)
-3. `complete_assessment` — resumen ejecutivo conjunto
+**Internal stages**:
+1. **Triage** — `classify_fault` for each of the 47 faults
+2. **Priority** — `set_priority` for each physical fault (transformers and cables)
+3. `complete_assessment` — joint executive summary
 
-**Herramientas**:
+**Tools**:
 
-| Herramienta | Parámetros | Efecto |
-|-------------|-----------|--------|
-| `classify_fault` | `faultId, severity, criticalSite, batteryRisk` | Registra clasificación (read-only) |
-| `set_priority` | `faultId, rank, reason, slaRisk` | Registra orden de atención (read-only) |
-| `complete_assessment` | `summary` | Cierra el agente con resumen ejecutivo |
+| Tool | Parameters | Effect |
+|------|-----------|--------|
+| `classify_fault` | `faultId, severity, criticalSite, batteryRisk` | Records classification (read-only) |
+| `set_priority` | `faultId, rank, reason, slaRisk` | Records dispatch order (read-only) |
+| `complete_assessment` | `summary` | Closes agent with executive summary |
 
-**Eventos `action` emitidos** (`SAP S/4HANA Asset Management + Event Mesh`):
-- En `complete_assessment`: número de activos analizados, sitios críticos identificados y fallos físicos rankeados
+**`action` events emitted** (`SAP S/4HANA Asset Management + Event Mesh`):
+- On `complete_assessment`: assets analysed, critical sites identified, physical faults ranked
 
-**Criterios de clasificación**:
-- `critical` — sitio crítico con batería < SLA o < 30 min
-- `high` — sitio crítico con batería suficiente, o residencial con > 3.000 clientes
-- `medium` — residencial 500–3.000 clientes
-- `low` — residencial < 500 clientes
+**Classification criteria**:
+- `critical` — critical site with battery < SLA or < 30 min
+- `high` — critical site with sufficient battery, or residential with > 3,000 customers
+- `medium` — residential 500–3,000 customers
+- `low` — residential < 500 customers
 
-**Regla de priorización**:
-1. Sitios críticos ordenados por batería restante ASC (menor batería = más urgente)
-2. Residenciales por clientes afectados DESC
+**Prioritisation rule**:
+1. Critical sites ordered by remaining battery ASC (less battery = more urgent). EPAL Loures is absolute rank 1 if battery < 60 min.
+2. Residential faults ordered by affected customers DESC
 
 ---
 
-## Remote Restoration Scada Agent
+## Remote Restoration SCADA Agent
 
-**Archivo**: `src/server/engine/agents/rerouting.ts`  
-**Entrada**: fallos conmutables pendientes + límite de operaciones de telecontrol  
-**Propósito**: restaurar el máximo de suministro sin enviar brigadas, usando telecontrol remoto
+**File**: `src/server/engine/agents/rerouting.ts`  
+**Input**: pending switchable faults + authorised SCADA operation limit  
+**Purpose**: restore as much supply as possible without sending crews, using remote SCADA switching on the Lisboa underground grid
 
-**Herramientas**:
+**Tools**:
 
-| Herramienta | Parámetros | Efecto en estado |
-|-------------|-----------|-----------------|
-| `attempt_remote_switch` | `faultId` | `fault.status: fault → switching → restored`, emite `asset_update` ×2 |
-| `complete_rerouting` | `summary` | Cierra agente con resumen de operaciones |
+| Tool | Parameters | State effect |
+|------|-----------|--------------|
+| `attempt_remote_switch` | `faultId` | `fault.status: fault → switching → restored`, emits `asset_update` ×2 |
+| `complete_rerouting` | `summary` | Closes agent with operation summary |
 
-**Eventos `action` emitidos** (`SAP Asset Intelligence Network`):
-- Por cada `attempt_remote_switch` exitosa: conmutación ejecutada con ID de fallo, zona y clientes reconectados
+**`action` events emitted** (`SAP Asset Intelligence Network`):
+- Per successful `attempt_remote_switch`: switch executed with fault ID, zone, and customers reconnected
 
-**Restricciones**:
-- Solo puede operar `params.switchableFaults` conmutaciones (límite autorizado del día)
-- El handler valida el límite y devuelve error si se supera, forzando a Claude a parar
+**Constraints**:
+- Can only perform `params.switchableFaults` switches (daily authorised ERSE limit)
+- Handler validates the limit and returns an error if exceeded, forcing Claude to stop
 
-**Efecto observable**: los nodos del mapa cambian de rojo → amarillo (switching) → verde (restored) con un delay de 600ms simulando la latencia de telecontrol.
+**Observable effect**: map nodes change from red → yellow (switching) → green (restored) with a 600 ms delay simulating SCADA switching latency.
 
 ---
 
 ## Service Dispatcher Agent
 
-**Archivo**: `src/server/engine/agents/crew-dispatch.ts`  
-**Entrada**: brigadas disponibles + fallos físicos pendientes + ventana de segunda tormenta + estado de Drolius  
-**Propósito**: asignar brigadas a fallos, respetando skills y la ventana de seguridad; opcionalmente desplegar Drolius para inspección previa
+**File**: `src/server/engine/agents/crew-dispatch.ts`  
+**Input**: available crews + pending physical faults + second storm window + Drolius status  
+**Purpose**: assign crews to faults respecting skills and the safety window; optionally deploy Drolius for pre-visit reconnaissance
 
-**Herramientas**:
+**Tools**:
 
-| Herramienta | Parámetros | Efecto en estado |
-|-------------|-----------|-----------------|
-| `dispatch_crew` | `crewId, faultId, eta, reason` | `crew.status = 'busy'`, `fault.status = 'crew-en-route'`, emite `asset_update` |
-| `dispatch_drolius` | `faultId, mission` | Emite `drolius_update` × 1 (deployed), devuelve informe; Drolius permanece desplegado |
-| `skip_fault` | `faultId, reason` | Registra fallo sin asignar (sin efecto en estado) |
-| `complete_dispatch` | `summary` | Cierra agente |
+| Tool | Parameters | State effect |
+|------|-----------|--------------|
+| `dispatch_crew` | `crewId, faultId, eta, reason` | `crew.status = 'busy'`, `fault.status = 'crew-en-route'`, emits `asset_update` |
+| `dispatch_drolius` | `faultId, mission` | Emits `drolius_update` × 1 (deployed), returns inspection report; Drolius stays deployed |
+| `skip_fault` | `faultId, reason` | Records fault as unassignable (no state effect) |
+| `complete_dispatch` | `summary` | Closes agent |
 
-**Eventos `action` emitidos** (`SAP Field Service Management`):
-- Por cada `dispatch_crew` exitoso: orden de trabajo creada con brigada, fallo, zona y ETA
+**`action` events emitted** (`SAP Field Service Management`):
+- Per successful `dispatch_crew`: work order created with crew, fault, zone, and ETA
 
-**Eventos emitidos** (`Drolius · ANYbotics`):
-- Despliegue: `Drolius desplegado → <zona> (<faultId>) — misión: <tipo>`
+**`action` events emitted** (`Drolius · ANYbotics`):
+- Deployment: `Drolius deployed → <zone> (<faultId>) — mission: <type>`
+- Report: `Drolius transmits report: <first 100 chars>…`
 
-**Misiones Drolius** (`mission`):
+**Drolius missions** (`mission`):
 
-| Misión | Información devuelta |
-|--------|---------------------|
-| `battery_check` | Nivel de batería SAI (BMS directo), temperatura transformador, carga actual, recomendación de urgencia |
-| `zone_access` | Condiciones de zona, obstáculos detectados, ajuste de ETA para brigada |
-| `damage_assessment` | Tipo de daño, materiales necesarios, nivel de seguridad de zona |
+| Mission | Information returned |
+|---------|---------------------|
+| `battery_check` | UPS battery level (direct BMS read), transformer temperature, current load, urgency recommendation |
+| `zone_access` | Zone conditions, obstacles detected, ETA adjustment for crew (eucalyptus on EN9/EN247 in Sintra) |
+| `damage_assessment` | Damage type, materials needed, zone safety level |
 
-**Comportamiento de Drolius**: solo una misión por simulación. El robot pasa de `available` a `deployed` de forma permanente: emite un único `drolius_update` (deployed) y devuelve el informe instantáneamente sin delays. Permanece en estado `deployed` en la ubicación del fallo por el resto de la simulación. Los informes son deterministas basados en los datos del fallo (no aleatorios) para asegurar coherencia entre simulaciones. Claude recibe el informe como resultado de herramienta y puede ajustar sus decisiones de despacho en consecuencia.
+**Drolius behaviour**: one mission per simulation. The robot moves from `available` to `deployed` permanently: emits a single `drolius_update` (deployed) and returns the report instantly with no delays. Stays `deployed` at the fault location for the rest of the simulation. Reports are deterministic based on fault data (not random) for consistency between simulations. Claude receives the report as a tool result and can adjust its dispatch decisions accordingly.
 
 **Skills**:
-- Skill **A** → reparación de transformadores
-- Skill **B** → reparación de cables
-- Skill **C** → operaciones auxiliares
+- Skill **A** → transformer repair
+- Skill **B** → cable repair
+- Skill **C** → auxiliary operations
 
-**Ventana de tormenta**: si `storm2Window = T+4h`, Claude debe evitar despachar transformadores con ETA > 210 min. El system prompt lo especifica explícitamente.
+**South bank ETA penalty**: Almada and Setúbal crews (margem sul) have a base +20 min ETA due to Ponte 25 de Abril congestion. The system prompt specifies this explicitly.
+
+**Storm window**: if `storm2Window = T+4h`, Claude must avoid dispatching transformer crews with ETA > 210 min. Explicitly stated in the system prompt.
 
 ---
 
 ## Resource Capacity Shortage Agent
 
-**Archivo**: `src/server/engine/agents/resource.ts`  
-**Entrada**: fallos con `status: 'crew-en-route'` + inventario actual  
-**Propósito**: verificar que hay material suficiente para todas las brigadas desplegadas y registrar conflictos
+**File**: `src/server/engine/agents/resource.ts`  
+**Input**: faults with `status: 'crew-en-route'` + current inventory  
+**Purpose**: verify sufficient materials for all dispatched crews and record conflicts
 
-**Herramientas**:
+**Tools**:
 
-| Herramienta | Parámetros | Efecto en estado |
-|-------------|-----------|-----------------|
-| `allocate_resource` | `faultId, resourceType` | Decrementa `inventory[resourceType]` |
-| `flag_conflict` | `faultId, reason` | Emite `conflict`, activa `hadConflict = true` |
-| `complete_resources` | `summary` | Cierra agente |
+| Tool | Parameters | State effect |
+|------|-----------|--------------|
+| `allocate_resource` | `faultId, resourceType` | Decrements `inventory[resourceType]` |
+| `flag_conflict` | `faultId, reason` | Emits `conflict`, sets `hadConflict = true` |
+| `complete_resources` | `summary` | Closes agent |
 
-**Eventos `action` emitidos** (`SAP Integrated Business Planning`):
-- Por cada `allocate_resource`: material reservado en IBP (tipo y fallo destino)
-- Por cada `flag_conflict`: solicitud de reposición de material registrada en IBP
+**`action` events emitted** (`SAP Integrated Business Planning`):
+- Per `allocate_resource`: material reserved in IBP (type and target fault)
+- Per `flag_conflict`: material replenishment request registered in IBP
 
 **`resourceType`**: `transformer` \| `cable` \| `mobile_generator`
 
-**Escenario de conflicto** (`limitedParts = 1`): solo hay 1 transformador en inventario para 7 fallos de transformador. Claude debe asignar el transformador al sitio crítico con menos batería y registrar conflicto para los restantes. El `hadConflict` se propaga a Communications Insight Agent para que lo mencione en la notificación regulatoria.
+**Conflict scenario** (`limitedParts = 1`): only 1 transformer in inventory for 7 transformer faults. Claude must allocate the transformer to the critical site with least battery and flag a conflict for the rest. The `hadConflict` flag propagates to the Communications Insight Agent so it mentions it in the regulatory notification.
 
 ---
 
 ## Communications Insight Agent
 
-**Archivo**: `src/server/engine/agents/comms.ts`  
-**Entrada**: resumen del incidente (restaurados, brigadas, clientes, sitios críticos, `hadConflict`, sitios con batería bajo SLA)  
-**Propósito**: redactar y emitir 3 comunicaciones obligatorias. Es el **único agente** autorizado a emitir eventos `comms`.
+**File**: `src/server/engine/agents/comms.ts`  
+**Input**: incident summary (restored faults, crews, customers, critical sites, `hadConflict`, sites with battery below SLA)  
+**Purpose**: draft and emit 3 mandatory communications. The **only agent** authorised to emit `comms` events.
 
-**Herramientas**:
+**Tools**:
 
-| Herramienta | Canal | Restricciones |
-|-------------|-------|--------------|
-| `send_sms` | SMS masivo a clientes | ≤ 160 chars, debe mencionar "Iberdrola" |
-| `send_press_release` | Medios locales (El Punt Avui, Diari de Girona, RAC1) | Puede estar en catalán |
-| `send_regulatory` | CTEPC / CNMC | Formal, incluye datos técnicos; si `hadConflict` o batería crítica, debe mencionarlo |
-| `complete_comms` | — | Cierra agente |
+| Tool | Channel | Constraints |
+|------|---------|-------------|
+| `send_sms` | Mass SMS to customers | ≤ 160 chars, must mention EDP Distribuição |
+| `send_press_release` | Lisboa media (Público, Expresso, RTP, TSF, Rádio Renascença) | In Portuguese |
+| `send_regulatory` | ERSE / ANPC | Formal, includes technical data; must mention conflict or critical battery if applicable |
+| `complete_comms` | — | Closes agent |
 
-**Orden obligatorio**: SMS → Nota de prensa → Regulatorio → `complete_comms`.
+**Mandatory order**: SMS → Press release → Regulatory → `complete_comms`.
 
-**Contexto enriquecido**: el user message incluye la lista de sitios críticos con batería restante y un flag explícito si alguno está por debajo del SLA objetivo, para que Claude pueda incluir la información correcta en la notificación regulatoria.
+**Enriched context**: the user message includes the list of critical sites with remaining battery and an explicit flag if any is below the SLA target, so Claude can include accurate information in the regulatory notification.
 
-**Eventos `action` emitidos** (`SAP Customer Experience`):
-- En `send_sms`: SMS masivo enviado vía SAP CX con preview del texto
-- En `send_press_release`: nota de prensa publicada hacia medios locales de Girona
-- En `send_regulatory`: notificación regulatoria enviada hacia CTEPC/CNMC
+**`action` events emitted** (`SAP Customer Experience`):
+- On `send_sms`: mass SMS sent via SAP CX with text preview
+- On `send_press_release`: press release published to Lisboa media
+- On `send_regulatory`: regulatory notification sent to ERSE/ANPC
 
 ---
 
-## Parámetros de simulación (`SimParams`)
+## Simulation parameters (`SimParams`)
 
-| Parámetro | Rango | Descripción |
+| Parameter | Range | Description |
 |-----------|-------|-------------|
-| `minuteSLA` | 30–120 | Tiempo máximo de restauración comprometido (min) |
-| `switchableFaults` | 5–22 | Operaciones de telecontrol autorizadas para la jornada |
-| `limitedParts` | 0 \| 1 | 0 = inventario completo (2 transformadores); 1 = solo 1 disponible |
-| `storm2Window` | T+4h \| T+6h \| T+8h \| none | Ventana antes de la segunda tormenta; condiciona las decisiones de Service Dispatcher Agent |
-| `availableCrews` | 8–22 | Brigadas activas (subconjunto de las 22 del escenario base) |
+| `minuteSLA` | 30–120 | Maximum committed restoration time (min) |
+| `switchableFaults` | 5–22 | Authorised SCADA operations for the day (ERSE limit) |
+| `limitedParts` | 0 \| 1 | 0 = full inventory (2 transformers); 1 = only 1 available |
+| `storm2Window` | T+4h \| T+6h \| T+8h \| none | Window before the second storm; conditions Service Dispatcher Agent decisions |
+| `availableCrews` | 8–22 | Active crews (subset of the 22 in the base scenario) |
 
-El orden de los parámetros en el panel lateral: SLA → Conmutables → Piezas limitadas → Brigadas → Ventana tormenta 2.
+Parameter order in the sidebar: SLA → Switchable → Limited parts → Crews → Storm 2 window.
 
-Todos los controles incluyen un tooltip informativo accesible al pasar el cursor. Los KPIs muestran `—` hasta que finaliza la simulación.
+All controls include an informative tooltip. KPIs show `—` until the simulation completes.
 
-**KPIs calculados por `finalize`**:
+**KPIs calculated by `finalize`**:
 
-| KPI | Fórmula | Escala |
-|-----|---------|--------|
-| SLA | % clientes con resolución en curso (telecontrol o brigada) | % (mayor es mejor) |
-| Seguridad | % sitios críticos cubiertos | % (mayor es mejor) |
-| Eficiencia | % fallos físicos atendidos | % (mayor es mejor) |
-| TIEPI | Σ(clientes_i × tiempo_estimado_i) / total_clientes | minutos (menor es mejor) |
-| MTTR | Σ(tiempo_estimado fallos atendidos) / total_fallos_atendidos | minutos (menor es mejor) |
+| KPI | Formula | Scale |
+|-----|---------|-------|
+| SLA | % customers with resolution in progress (SCADA or crew) | % (higher is better) |
+| Safety | % critical sites covered | % (higher is better) |
+| Efficiency | % physical faults attended | % (higher is better) |
+| TIEPI | Σ(customers_i × estimated_time_i) / total_customers | minutes (lower is better) |
+| MTTR | Σ(estimated time of attended faults) / total_attended_faults | minutes (lower is better) |
 
-Tiempos estimados por estado: restaurado (telecontrol) = 10 min · crew-en-route transformer = 135 min · crew-en-route cable = 90 min · fallo sin atender = 240 min.
+Estimated times per status: restored (SCADA) = 10 min · crew-en-route transformer = 135 min · crew-en-route cable = 90 min · unattended fault = 240 min.
 
 ---
 
-## Estados de un fallo
+## Fault states
 
 ```
-fault → crew-en-route             (brigada asignada, agente Service Dispatcher Agent)
-fault → switching → restored      (telecontrol, agente Remote Restoration Scada Agent)
+fault → crew-en-route             (crew assigned, Service Dispatcher Agent)
+fault → switching → restored      (SCADA, Remote Restoration SCADA Agent)
 ```
 
-El frontend mapea cada estado a un color en el mapa:
+The frontend maps each state to a colour on the map:
 
-| Estado | Color |
-|--------|-------|
-| `fault` | Rojo |
-| `switching` | Amarillo parpadeando |
-| `restored` | Verde |
-| `crew-en-route` | Naranja |
+| State | Colour |
+|-------|--------|
+| `fault` | Red |
+| `switching` | Blinking yellow |
+| `restored` | Green |
+| `crew-en-route` | Orange |
 
-> Los estados `repairing` y `repaired` están definidos en `types.ts` para uso futuro pero no se asignan en la simulación actual — las brigadas despachadas permanecen en `crew-en-route` hasta el cierre del ciclo.
+> States `repairing` and `repaired` are defined in `types.ts` for future use but are not assigned during simulation — dispatched crews remain in `crew-en-route` until the cycle closes.
