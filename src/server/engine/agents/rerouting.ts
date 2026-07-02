@@ -43,12 +43,8 @@ export async function runRerouting(
         fault.status = 'restored';
         emit({ type: 'asset_update', id: fault.id, status: 'restored' });
         restoredFaultIds.push(fault.id);
-        emit({ type: 'action', agent: 'rerouting', system: 'SAP Asset Intelligence Network', msg: params.language === 'en'
-          ? `Remote switch executed: ${fault.id} — ${fault.zone} (${fault.affectedClients.toLocaleString()} customers reconnected)`
-          : params.language === 'pt'
-          ? `Comutação remota executada: ${fault.id} — ${fault.zone} (${fault.affectedClients.toLocaleString()} clientes reconectados)`
-          : `Conmutación remota ejecutada: ${fault.id} — ${fault.zone} (${fault.affectedClients.toLocaleString()} clientes reconectados)` });
-        return `Conmutación exitosa: ${fault.id} (${fault.zone}) restaurado — ${fault.affectedClients.toLocaleString()} clientes reconectados`;
+        emit({ type: 'action', agent: 'rerouting', system: 'SAP Asset Intelligence Network', msg: `Comutação remota executada: ${fault.id} — ${fault.zone} (${fault.affectedClients.toLocaleString()} clientes reconectados)` });
+        return `Comutação bem-sucedida: ${fault.id} (${fault.zone}) restaurado — ${fault.affectedClients.toLocaleString()} clientes reconectados`;
       },
     },
     {
@@ -90,7 +86,6 @@ Executa as comutações usando attempt_remote_switch, depois chama complete_rero
     maxTokens: 8192,
     haiku: true,
     instructions: params.instructions,
-    language: params.language,
   });
 
   return {

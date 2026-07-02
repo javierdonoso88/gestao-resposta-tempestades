@@ -259,7 +259,7 @@ export function ResultsOverlay({ faults, totalClients, kpi, agentLogs, commsMess
     const clientsWord = t.map.tooltipClients.replace(':', '').toLowerCase();
 
     const html = `<!DOCTYPE html>
-<html lang="${t.lang.toggle === 'ES' ? 'en' : 'es'}">
+<html lang="pt">
 <head>
 <meta charset="UTF-8"/>
 <title>${t.results.pdfTitle} — ${t.app.title}</title>
@@ -394,7 +394,7 @@ export function ResultsOverlay({ faults, totalClients, kpi, agentLogs, commsMess
 
   <div class="footer">
     <span>${t.app.title} · Área Metropolitana de Lisboa</span>
-    <span>${t.results.pdfGenerated} ${new Date().toLocaleString(t.lang.toggle === 'ES' ? 'en-GB' : 'es-ES')}</span>
+    <span>${t.results.pdfGenerated} ${new Date().toLocaleString('pt-PT')}</span>
   </div>
 </body>
 </html>`;

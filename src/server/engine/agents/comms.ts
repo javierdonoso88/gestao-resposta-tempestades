@@ -33,11 +33,7 @@ export async function runComms(
         const msg = input.text as string;
         commsMessages.push({ channel: 'sms', msg });
         emit({ type: 'comms', channel: 'sms', msg });
-        emit({ type: 'action', agent: 'comms', system: 'SAP Customer Experience', msg: params.language === 'en'
-          ? `Mass SMS sent via SAP CX — ${msg.slice(0, 60)}${msg.length > 60 ? '…' : ''}`
-          : params.language === 'pt'
-          ? `SMS em massa enviado via SAP CX — ${msg.slice(0, 60)}${msg.length > 60 ? '…' : ''}`
-          : `SMS masivo enviado vía SAP CX — ${msg.slice(0, 60)}${msg.length > 60 ? '…' : ''}` });
+        emit({ type: 'action', agent: 'comms', system: 'SAP Customer Experience', msg: `SMS em massa enviado via SAP CX — ${msg.slice(0, 60)}${msg.length > 60 ? '…' : ''}` });
         return 'SMS enviado.';
       },
     },
@@ -55,12 +51,8 @@ export async function runComms(
         const msg = input.text as string;
         commsMessages.push({ channel: 'press', msg });
         emit({ type: 'comms', channel: 'press', msg });
-        emit({ type: 'action', agent: 'comms', system: 'SAP Customer Experience', msg: params.language === 'en'
-          ? `Press release published via SAP CX → Lisboa media (Público, Expresso, RTP, TSF)`
-          : params.language === 'pt'
-          ? `Comunicado de imprensa publicado via SAP CX → media Lisboa (Público, Expresso, RTP, TSF)`
-          : `Comunicado de prensa publicado vía SAP CX → medios Lisboa (Público, Expresso, RTP, TSF)` });
-        return 'Nota de prensa enviada.';
+        emit({ type: 'action', agent: 'comms', system: 'SAP Customer Experience', msg: `Comunicado de imprensa publicado via SAP CX → media Lisboa (Público, Expresso, RTP, TSF)` });
+        return 'Comunicado de imprensa enviado.';
       },
     },
     {
@@ -77,12 +69,8 @@ export async function runComms(
         const msg = input.text as string;
         commsMessages.push({ channel: 'regulatory', msg });
         emit({ type: 'comms', channel: 'regulatory', msg });
-        emit({ type: 'action', agent: 'comms', system: 'SAP Customer Experience', msg: params.language === 'en'
-          ? `Regulatory notification sent via SAP CX → CTEPC/CNMC`
-          : params.language === 'pt'
-          ? `Notificação regulatória enviada via SAP CX → ERSE/CNMC`
-          : `Notificación regulatoria enviada vía SAP CX → CTEPC/CNMC` });
-        return 'Notificación regulatoria enviada.';
+        emit({ type: 'action', agent: 'comms', system: 'SAP Customer Experience', msg: `Notificação regulatória enviada via SAP CX → ERSE/ANPC` });
+        return 'Notificação regulatória enviada.';
       },
     },
     {
@@ -131,7 +119,6 @@ Redige e envia as 3 comunicações com send_sms, send_press_release, send_regula
     maxTokens: 8192,
     haiku: true,
     instructions: params.instructions,
-    language: params.language,
   });
 
   return {

@@ -54,12 +54,8 @@ export async function runCrewDispatch(
         fault.status = 'crew-en-route';
         dispatches.push({ crewId: crew.id, faultId: fault.id });
         emit({ type: 'asset_update', id: fault.id, status: 'crew-en-route' });
-        emit({ type: 'action', agent: 'crew-dispatch', system: 'SAP Field Service Management', msg: params.language === 'en'
-          ? `Work order created: ${crew.id} → ${fault.id} (${fault.zone}) — ETA ${input.eta} min`
-          : params.language === 'pt'
-          ? `Ordem de trabalho criada: ${crew.id} → ${fault.id} (${fault.zone}) — ETA ${input.eta} min`
-          : `Orden de trabajo creada: ${crew.id} → ${fault.id} (${fault.zone}) — ETA ${input.eta} min` });
-        return `OK: ${crew.id} despachado a ${fault.id} — ETA ${input.eta}min. ${fault.affectedClients.toLocaleString()} clientes afectados.`;
+        emit({ type: 'action', agent: 'crew-dispatch', system: 'SAP Field Service Management', msg: `Ordem de trabalho criada: ${crew.id} → ${fault.id} (${fault.zone}) — ETA ${input.eta} min` });
+        return `OK: ${crew.id} despachado para ${fault.id} — ETA ${input.eta}min. ${fault.affectedClients.toLocaleString()} clientes afetados.`;
       },
     },
     {
@@ -88,19 +84,11 @@ export async function runCrewDispatch(
         state.drolius.currentTask = input.faultId as string;
 
         emit({ type: 'drolius_update', status: 'deployed', task: input.faultId as string });
-        emit({ type: 'action', agent: 'crew-dispatch', system: 'Drolius · ANYbotics', msg: params.language === 'en'
-          ? `Drolius deployed → ${fault.zone} (${input.faultId}) — mission: ${input.mission}`
-          : params.language === 'pt'
-          ? `Drolius implantado → ${fault.zone} (${input.faultId}) — missão: ${input.mission}`
-          : `Drolius asignado en campo → ${fault.zone} (${input.faultId}) — misión: ${input.mission}` });
+        emit({ type: 'action', agent: 'crew-dispatch', system: 'Drolius · ANYbotics', msg: `Drolius implantado → ${fault.zone} (${input.faultId}) — missão: ${input.mission}` });
 
         const report = buildDroliusReport(fault, input.mission as string);
 
-        emit({ type: 'action', agent: 'crew-dispatch', system: 'Drolius · ANYbotics', msg: params.language === 'en'
-          ? `Drolius transmits report: ${report.slice(0, 100)}…`
-          : params.language === 'pt'
-          ? `Drolius transmite relatório: ${report.slice(0, 100)}…`
-          : `Drolius transmite informe: ${report.slice(0, 100)}…` });
+        emit({ type: 'action', agent: 'crew-dispatch', system: 'Drolius · ANYbotics', msg: `Drolius transmite relatório: ${report.slice(0, 100)}…` });
 
         return report;
       },
@@ -170,7 +158,6 @@ DROLIUS disponível: ${state.drolius.status === 'available' ? 'SIM — podes imp
     maxTokens: 8192,
     haiku: true,
     instructions: params.instructions,
-    language: params.language,
   });
 
   return {

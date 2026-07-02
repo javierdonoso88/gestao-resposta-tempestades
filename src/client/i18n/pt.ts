@@ -1,7 +1,59 @@
-import type { Translations } from './es';
+export interface Translations {
+  themes: { dark: string; joule: string; edp: string };
+  nav: { openSimulator: string; back: string };
+  hero: { badge: string; subtitle: string; location: string; cta: string; scroll: string };
+  stats: { clients: string; clientsSub: string; faults: string; faultsSub: string; crews: string; crewsSub: string; critical: string; criticalSub: string };
+  challenge: { eyebrow: string; title: string; titleHighlight: string; body: string; card1: string; card1Sub: string; card2: string; card2Sub: string; card3: string; card3Sub: string; card4: string; card4Sub: string; drolius: string; droluisSub: string };
+  arch: { eyebrow: string; title: string; subtitle: string; supervisor: string; sapSystem: string; phase1: string; phase2: string; agents: { techLabel: string; techDesc: string; scadaLabel: string; scadaDesc: string; dispLabel: string; dispDesc: string; resLabel: string; resDesc: string; commsLabel: string; commsDesc: string } };
+  cta: { eyebrow: string; title: string; body: string; button: string; footer: string };
+  app: { title: string; standby: string; running: string; done: string; report: string; window: string };
+  params: {
+    header: string; incident: string; moreInfo: string; incidentBody: string;
+    droluisAvailable: string; droluisRunning: string;
+    sla: string; slaTip: string; switchable: string; switchableTip: string;
+    limitedParts: string; limitedPartsTip: string; limitedPartsOn: string;
+    crews: string; crewsTip: string; storm2: string; noStorm: string;
+    operatorInstructions: string; operatorPlaceholder: string; operatorHint: string;
+    simulate: string; simulating: string; kpis: string;
+    slaKpi: string; slaSub: string; safety: string; safetySub: string;
+    efficiency: string; efficiencySub: string; tiepi: string; tiepiSub: string; mttr: string; mttrSub: string;
+    infoTitle: string; infoSummary: string; infoFaults: string; infoFaultsLabel: string;
+    infoCritical: string; infoCriticalLabel: string; infoFaultTypes: string; infoResources: string;
+    infoChallenges: string; infoClose: string; infoCrewBases: string; infoInventory: string; infoDrolius: string;
+  };
+  map: { header: string; fault: string; switching: string; restored: string; crewEnRoute: string; repairing: string; repaired: string; typeSwitchable: string; typeTransformer: string; typeCable: string; tooltipType: string; tooltipClients: string; tooltipBattery: string; droluisScout: string; droluisAssigned: string; legendFault: string; legendActive: string; legendOk: string };
+  log: { header: string; live: string; placeholder: string; supervisor: string; phase1: string; phase2: string; pending: string; agentOrchestrator: string; agentTriage: string; agentRerouting: string; agentDispatch: string; agentResource: string; agentComms: string };
+  gantt: { header: string; phase1: string; phase2: string; running: string; done: string; pending: string; conflicts: string; agents: { orchestratorLabel: string; orchestratorSub: string; orchestratorTip: string; triageLabel: string; triageSub: string; triageTip: string; reroutingLabel: string; reroutingSub: string; reroutingTip: string; dispatchLabel: string; dispatchSub: string; dispatchTip: string; resourceLabel: string; resourceSub: string; resourceTip: string; commsLabel: string; commsSub: string; commsTip: string } };
+  panels: { sapHeader: string; commsHeader: string; sapPlaceholder: string; commsPlaceholder: string; sms: string; press: string; regulatory: string };
+  results: {
+    title: string; completed: string; mission: string; download: string; close: string; duration: string;
+    kpiSla: string; kpiSafety: string; kpiEfficiency: string;
+    tiepi: string; tiepiLong: string; mttr: string; mttrLong: string;
+    clientsServed: string; faultsHandled: string; criticalCovered: string; pendingActions: string;
+    sapIntegration: string; sapSystems: string; sapWorkOrders: string; sapSwitches: string;
+    sapMaterials: string; sapReplenish: string; sapMessages: string; sapAssets: string; sapDrolius: string;
+    analysisTitle: string; analysisEmpty: string;
+    pendingTitle: string; pendingUnresolved: string; pendingUnresolvedPlural: string;
+    mitigationLabel: string; mitigationCritical: string; mitigationTransformer: string; mitigationCable: string; mitigationSwitchable: string;
+    urgencyCritical: string; urgencyModerate: string; urgencyLow: string;
+    gradOptimal: string; gradAcceptable: string; gradCritical: string;
+    pdfTitle: string; pdfKpis: string; pdfOperational: string; pdfSap: string; pdfAnalysis: string; pdfPending: string; pdfGenerated: string;
+  };
+  modal: {
+    title: string; subtitle: string;
+    summaryTitle: string; summaryClients: string; summaryFaults: string; summaryCritical: string; summaryBody: string;
+    criticalTitle: string; criticalSubtitle: string; faultTypesTitle: string;
+    faultSwitchable: string; faultSwitchableDesc: string; faultTransformer: string; faultTransformerDesc: string; faultCable: string; faultCableDesc: string; faultParamNote: string;
+    resourcesTitle: string; crewBases: string; totalMax: string; inventory: string;
+    matTransformers: string; matCables: string; matGenerator: string; matTransNote: string; matCableNote: string; matGenNote: string; limitedPartsWarning: string;
+    droliusTitle: string; droliusBody: string; tensionsTitle: string;
+    tension1Label: string; tension1Desc: string; tension2Label: string; tension2Desc: string; tension3Label: string; tension3Desc: string; tension4Label: string; tension4Desc: string;
+    urgencyCritical: string; urgencyHigh: string; urgencyMedium: string; urgencyLow: string;
+    siteDataCenter: string; siteHealth: string; siteWater: string; siteEmergency: string; siteHospital: string;
+  };
+}
 
 export const pt: Translations = {
-  lang: {},
   themes: { dark: 'Escuro', joule: 'Roxo', edp: 'Verde' },
   nav: { openSimulator: 'Abrir Simulador →', back: 'Início' },
   hero: {

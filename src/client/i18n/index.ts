@@ -1,6 +1,6 @@
 import { pt } from './pt';
 
-export type { Translations } from './es';
+export type { Translations } from './pt';
 
 export function useT() {
   return pt;

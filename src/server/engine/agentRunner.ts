@@ -19,9 +19,8 @@ export async function runAgent(opts: {
   maxTurns?: number;
   haiku?: boolean;
   instructions?: string;
-  language?: string;
 }): Promise<void> {
-  const { systemPrompt, userMessage, tools, emit, agentId, maxTokens = 4096, maxTurns = 15, haiku = false, instructions, language } = opts;
+  const { systemPrompt, userMessage, tools, emit, agentId, maxTokens = 4096, maxTurns = 15, haiku = false, instructions } = opts;
   const modelName = haiku ? MODEL_HAIKU : MODEL_SONNET;
 
   const langInstruction = 'REGRA DE IDIOMA CRÍTICA: DEVES escrever TODA a saída em Português Europeu — raciocínio, análise, campos de texto das ferramentas, resumos e qualquer narrativa. NÃO uses Espanhol nem Inglês em nenhuma circunstância.';

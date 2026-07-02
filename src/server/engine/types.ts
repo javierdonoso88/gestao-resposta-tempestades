@@ -6,12 +6,11 @@ export type DroliusStatus = 'available' | 'deployed' | 'returning';
 
 export interface SimParams {
   minuteSLA: number;          // 30–120 min
-  switchableFaults: number;   // 5–22 (how many are remote-switchable today)
+  switchableFaults: number;   // 5–22
   limitedParts: 0 | 1;       // 0=full inventory, 1=limited (only 1 transformer available)
   storm2Window: 'T+4h' | 'T+6h' | 'T+8h' | 'none';
   availableCrews: number;     // 8–22
-  instructions?: string;      // free-text operator instructions injected into orchestrator prompt
-  language?: 'es' | 'en' | 'pt';  // response language for all agents
+  instructions?: string;      // free-text operator instructions
 }
 
 export interface Fault {

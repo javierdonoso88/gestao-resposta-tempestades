@@ -222,7 +222,7 @@ export default function App() {
             <ParametersPanel
               params={params}
               onChange={p => setParams(prev => ({ ...prev, ...p }))}
-              onSimulate={() => { setShowResults(false); startSimulation(params, 'pt'); }}
+              onSimulate={() => { setShowResults(false); startSimulation(params); }}
               running={state.running}
               kpi={state.kpi}
               drolius={state.drolius}
