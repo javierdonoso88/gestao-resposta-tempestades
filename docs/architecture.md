@@ -6,7 +6,7 @@
 User configures parameters → POST /api/simulate
     └─► runOrchestrator(params, emit)
             │
-            ├── buildScenario()          # Builds initial state: 47 faults + 22 crews
+            ├── buildScenario()          # Builds initial state: 47 faults + 22 crews (AML Lisboa)
             ├── setInterval safety_tick  # Safety ticker every 2s
             │
             ├── [Turn 1] Orchestrator Claude
@@ -46,7 +46,7 @@ Each `emit()` is serialised as an SSE event and sent to the client immediately.
 | `comms` | `{ channel, msg }` | Adds message to communications feed |
 | `action` | `{ agent, system, msg }` | Adds entry to SAP Actions feed |
 | `conflict` | `{ winner, loser, reason }` | Shows conflict alert |
-| `drolius_update` | `{ status, task?, report? }` | Updates Drolius status chip in sidebar; `status` is `'deployed'` (only emitted state) |
+| `drolius_update` | `{ status, task?, report? }` | Updates Drolius status chip in sidebar |
 | `safety_tick` | `{ elapsed, limit }` | Updates safety progress bar |
 | `kpi` | `{ sla, safety, efficiency, tiepi, mttr }` | Updates final metrics |
 | `done` | `{ elapsed }` | Closes the simulation |
@@ -58,7 +58,7 @@ Each `emit()` is serialised as an SSE event and sent to the client immediately.
 | Component | Model | Reason |
 |-----------|-------|--------|
 | Orchestrator | `claude-sonnet-4-6` | Narrative reasoning visible in the executive summary |
-| Sub-agents (Technician Briefing, Remote Restoration SCADA, Service Dispatcher, Resource Capacity Shortage, Communications Insight) | `claude-haiku-4-5` | Structured tool-use decisions; lower latency |
+| Sub-agents (all 5) | `claude-haiku-4-5` | Structured tool-use decisions; lower latency |
 
 The Haiku deployment is configured via `AICORE_HAIKU_DEPLOYMENT_ID`. If not set, both roles fall back to the Sonnet deployment.
 
@@ -66,7 +66,7 @@ The Haiku deployment is configured via `AICORE_HAIKU_DEPLOYMENT_ID`. If not set,
 
 ## SAP AI Core adapter (`anthropicClient.ts`)
 
-The Anthropic SDK calls `/v1/messages`. SAP AI Core exposes a Bedrock-compatible API with different routes and body format. The adapter in `anthropicClient.ts` acts as a transparent middleware:
+The Anthropic SDK calls `/v1/messages`. SAP AI Core exposes a Bedrock-compatible API with different routes and body format. The adapter acts as transparent middleware:
 
 ### Non-streaming request
 
@@ -92,13 +92,11 @@ SDK → POST /v1/messages { stream: true, ... }
           ▼ customFetch
 - Detects `stream: true`, removes from body
 - Rewrites URL → /invoke-with-response-stream
-- Same header/body transformations
           │
           ▼
 AI Core → POST /invoke-with-response-stream
        ← SSE: data: {"type":"message_start",...}
                data: {"type":"content_block_delta",...}
-               ...
           │
           ▼ injectEventLines()
        ← SSE: event: message_start
@@ -106,13 +104,12 @@ AI Core → POST /invoke-with-response-stream
 
                event: content_block_delta
                data: {"type":"content_block_delta",...}
-               ...
           │
           ▼
 SDK receives SSE with event: lines → processes normally
 ```
 
-**Why `injectEventLines` is needed**: AI Core (Bedrock format) sends SSE with only `data:` lines, without a preceding `event:` line. The Anthropic SDK checks `sse.event` to determine the event type; without it, `sse.event === null` and the stream emits no chunks → "request ended without sending any chunks" error. The transformer reads the `type` field from the JSON in each `data:` line and prepends the corresponding `event: <type>` line.
+**Why `injectEventLines` is needed**: AI Core (Bedrock format) sends SSE with only `data:` lines, without a preceding `event:` line. The Anthropic SDK checks `sse.event` to determine the event type; without it, `sse.event === null` and the stream emits no chunks → "request ended without sending any chunks" error. The transformer reads the `type` field from each `data:` JSON and prepends the corresponding `event: <type>` line.
 
 ### OAuth2 token
 
@@ -121,7 +118,6 @@ SDK receives SSE with event: lines → processes normally
 if (tokenCache && tokenCache.expiresAt - now > 60_000) {
   return tokenCache.token;
 }
-// OAuth2 client_credentials against the BTP tenant
 POST TOKEN_URL
   Authorization: Basic base64(clientId:clientSecret)
   body: grant_type=client_credentials
@@ -155,7 +151,16 @@ for turn in 0..maxTurns:
   messages.push({ role: 'user', content: toolResults })
 ```
 
-Handlers return descriptive strings on success or `"Error: ..."` on failure, allowing Claude to self-correct on the next turn.
+Every agent call includes a Portuguese language instruction at the start and end of the system prompt, and as a prefix to the user message:
+
+```
+// system prompt (start and end):
+REGRA DE IDIOMA CRÍTICA: DEVES escrever TODA a saída em Português Europeu —
+raciocínio, chamadas de ferramentas, resumos e qualquer narrativa.
+
+// user message (prefix):
+[RESPONDE APENAS EM PORTUGUÊS EUROPEU]
+```
 
 ---
 
@@ -179,10 +184,8 @@ emit({ type: 'asset_update', id: fault.id, status: 'crew-en-route' });
 // crew-dispatch.ts — dispatch_drolius
 state.drolius.status = 'deployed';
 emit({ type: 'drolius_update', status: 'deployed', task: faultId });
-// report generated instantly (no delays)
-const report = generateReport(fault, mission);
+const report = generateReport(fault, mission);  // deterministic, no delays
 return report;
-// Drolius stays in 'deployed' state for the rest of the simulation
 ```
 
 This guarantees that when `resource.ts` receives the state, faults already have `status: 'crew-en-route'` set by crew-dispatch.
@@ -192,8 +195,9 @@ This guarantees that when `resource.ts` receives the state, faults already have 
 ## KPIs (calculated in `finalize`)
 
 ```
-SLA        = attended_clients / total_affected_clients × 100
-             (attended = sum of affectedClients for faults with status restored or crew-en-route)
+SLA        = attended_clients / total_clients × 100
+             total_clients = 143,000 (from BASE_SCENARIO, includes critical-site clients)
+             attended = sum of affectedClients for faults with status restored or crew-en-route
 
 Safety     = critical_sites_covered / total_critical_sites × 100
              (covered = status crew-en-route or restored)
@@ -204,11 +208,11 @@ Efficiency = faults_attended / total_faults × 100
 
 Estimated interruption times per status: restored (SCADA) = 10 min · crew-en-route transformer = 135 min · crew-en-route cable = 90 min · unattended fault = 240 min.
 
+`totalClients` (143,000) is fetched from `/api/scenario` on load and passed to `ResultsOverlay` as a prop, so transformer faults with `affectedClients: 0` (critical sites) do not distort the denominator.
+
 ---
 
 ## Theme system (Dark / Joule / EDP)
-
-The simulator header includes a theme dropdown with three options:
 
 | Theme | Background | Border | Accent |
 |-------|-----------|--------|--------|
@@ -216,38 +220,32 @@ The simulator header includes a theme dropdown with three options:
 | SAP Joule | `#f3f5f8` light grey | `#dde3ec` | `#6d28d9` SAP purple |
 | EDP | `#f2f7f4` light green | `#c8ddd0` | `#00a651` EDP green |
 
-**Implementation**:
-
-- `ThemeContext.tsx` — React Context exposing `{ theme, setTheme }`. Supports `Theme = 'dark' | 'joule' | 'iberdrola'` (internal key). Persists in `localStorage('src-theme')` and writes `data-theme="<theme>"` on `document.documentElement`.
-- `globals.css` — variables in `:root` (dark), `[data-theme="joule"]` and `[data-theme="iberdrola"]`. The two light themes share the same token structure; they differ in `--accent` value and background tints. Components detect "light theme" with `isLight = theme !== 'dark'`.
-- All components use `var(--token)` in their inline styles. `MapPanel` and `ParametersPanel` also consume `useTheme()` for JS logic that cannot be resolved with CSS vars (CartoDB tile URL `dark_all` ↔ `light_all`, map node border colours, toggle switch conditional styles).
-- Tailwind arbitrary-value classes (e.g. `bg-[#111c2e]`) are overridden with `[data-theme="joule"] .bg-\[#111c2e\]` selectors in `globals.css`.
-
-**Toggle switch (`ParametersPanel`):** The knob uses `position: absolute` with `left: 2px` (OFF) / `left: 16px` (ON) and `transition-all` for animation. Explicit `left` is used instead of `translateX` because without `left: 0` as origin, the transform operates from the element's static position, which in some browsers is not the button's left edge. The OFF state uses a mid-grey (`#c4cdd9` Joule / `#334155` dark) so the white knob is visible in both themes.
-
-**Simulation status chips (`App.tsx`):** Background and text colours for the "Running" and "Completed" chips use CSS tokens `--status-running-bg/color` and `--status-done-bg/color`, defined in `:root` (dark orange / dark green) and overridden in `[data-theme="joule"]` (creamy orange / light green).
+- `ThemeContext.tsx` persists choice in `localStorage('src-theme')` and writes `data-theme` on `document.documentElement`.
+- `globals.css` defines CSS variable overrides for each theme.
+- Components use `var(--token)` in inline styles. `MapPanel` reads `useTheme()` for JS logic that cannot be resolved with CSS vars (CartoDB tile URL, node border colours).
 
 ---
 
 ## Executive Summary (`ResultsOverlay.tsx`)
 
-Appears automatically 800 ms after receiving the `done` event. Can be closed and reopened via the "View Report" button in the header until a new simulation starts.
+Appears automatically 800 ms after receiving the `done` event.
+
+**All text is in Portuguese**, including:
+- Section labels, KPI grades (`ÓTIMO` / `ACEITÁVEL` / `CRÍTICO`)
+- Urgency badges (`CRÍTICO` / `MODERADO` / `BAIXO`)
+- Pending action mitigation texts (per fault type: transformer, cable, switchable, critical site)
+- Plural handling: `1 falha por resolver` / `N falhas por resolver`
+- PDF download — all HTML generated in Portuguese
 
 **Sections:**
 
 | Section | Data source |
 |---------|-------------|
 | Circular KPI gauges (SLA · Safety · Efficiency) | `kpi` state from `kpi` event |
-| Operational indicators (customers, faults, critical sites, pending) | `faults` array |
+| Operational indicators | `faults` array + `totalClients` prop (143,000) |
 | SAP integration KPIs (7 systems, including Drolius) | `actionMessages` + `faults` |
 | Orchestrator analysis | `agentLogs.find(l => l.agent === 'orchestrator').text` |
 | Pending actions with mitigation | `faults.filter(f => f.status === 'fault')` |
-
-**CoT text cleanup and formatting:** `renderMarkdown()` converts Claude-generated text to JSX: `##`/`###` headings as cyan uppercase tags, `**bold**` as bright white, `*italic*` as light slate, `` `code` `` with dark cyan background, and `- item` lists as bullet points. Lines starting with `**` (bold) are correctly distinguished from bullets (`- ` / `* `) via precise regexes (`/^[-*]\s/`) to avoid infinite loops during render.
-
-**SVG gauges:** Arc calculated with `strokeDasharray = (value/100) × 2πr`. Empty arc uses `var(--border)`, filled arc uses threshold colour (green ≥80, orange ≥60, red <60). `zIndex: 2000` to overlay the Leaflet map (max z-index ~1000).
-
-**PDF download:** The "Download PDF" button generates a complete HTML document in memory (KPIs, operational stats, SAP integration, orchestrator analysis, pending actions with mitigation), opens it in a new window with `window.open()`, and calls `window.print()` after 400 ms to allow rendering. No external dependencies — all HTML and CSS is generated as a string in the client.
 
 ---
 
@@ -263,62 +261,16 @@ applications:
   command: node dist/server/index.js
   env:
     NODE_ENV: production
-    NPM_CONFIG_PRODUCTION: false   # required to install devDependencies (TypeScript, Vite)
+    NPM_CONFIG_PRODUCTION: false
 ```
 
-The `heroku-postbuild` script in `package.json` runs `npm run build` during CF staging, compiling TypeScript and Vite before the app starts.
+The `heroku-postbuild` script runs `npm run build` during CF staging.
 
 ```
 cf push
-  → npm install (including devDependencies via NPM_CONFIG_PRODUCTION=false)
+  → npm install (including devDependencies)
   → heroku-postbuild → tsc + vite build
   → node dist/server/index.js
 ```
 
----
-
-## Internationalisation (ES / EN / PT)
-
-The language selector (🇪🇸 🇬🇧 🇵🇹) is available in both the landing nav and the simulator header. It changes the UI language **and** all AI-generated content.
-
-### Full coverage
-
-| Area | Coverage |
-|------|----------|
-| Static UI | Landing, simulator, incident modal ("more info"), executive report (screen + downloadable PDF) |
-| AI agents | CoT logs, internal reasoning, orchestrator summary |
-| SAP actions | All 10 hardcoded action strings across 5 agents + orchestrator |
-| Communications | SMS, press release, regulatory notification |
-| PDF report | All labels, sections, KPI grades, urgency badges, fault types, footer |
-
-### Architecture
-
-- `LanguageContext.tsx` — React Context exposing `{ lang, setLang, cycleLang }`. Type `Lang = 'es' | 'en' | 'pt'`. Persists in `localStorage('src-lang')`.
-- `src/client/i18n/es.ts`, `en.ts`, `pt.ts` — typed objects with ~320 strings each, in sections: `nav`, `hero`, `stats`, `challenge`, `arch`, `cta`, `app`, `params`, `map`, `gantt`, `log`, `panels`, `results`, `modal`.
-- `src/client/i18n/index.ts` — exports the `useT()` hook returning the active language's translation object.
-- All components import `useT()` and reference strings as `t.params.simulate`, `t.map.header`, `t.modal.summaryTitle`, etc.
-
-### Language in AI agents
-
-The language is sent in the `language` field of `SimParams` with each `POST /api/simulate` request.
-
-**`agentRunner.ts`** injects the language instruction at both the start **and end** of the system prompt, and as a prefix to the user message (to reinforce it against the Spanish-dominant base prompts):
-
-```
-// system prompt (start and end):
-CRITICAL LANGUAGE RULE: You MUST write ALL your output in English —
-reasoning, tool calls, summaries and any narrative. No Spanish allowed.
-
-// user message (prefix):
-[RESPOND IN ENGLISH ONLY]
-```
-
-Portuguese uses an equivalent rule in European Portuguese.
-
-**`orchestrator.ts`** includes the same rule directly in its system prompt.
-
-**Hardcoded action messages** — the 10 SAP action strings (SCADA switches, work orders, material reservations, communications, etc.) have ES/EN/PT branches in each agent and the orchestrator, selected via `params.language`.
-
-### Orchestration diagram (GanttPanel)
-
-Redesigned with pure HTML layout + overlaid SVG for the connector arrows. Removes `<foreignObject>` in SVG (Safari-incompatible). Nodes are absolute `div` elements with a `ResizeObserver` to scale the diagram to available space. Connector colours adapt to the active theme (cyan / purple / green).
+URL: [gestao-resposta-tempestades.cfapps.eu10.hana.ondemand.com](https://gestao-resposta-tempestades.cfapps.eu10.hana.ondemand.com)
