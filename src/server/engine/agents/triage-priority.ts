@@ -87,7 +87,7 @@ export async function runTriagePriority(
   ];
 
   await runAgent({
-    systemPrompt: `Eres el agente Technician Briefing Agent del sistema de Respuesta a Tormentas de EDP Distribuição (AML Lisboa).
+    systemPrompt: `Eres el agente Technician Briefing Agent del sistema de Respuesta a Tormentas de Distribuição Eléctrica (AML Lisboa).
 Tu misión tiene dos etapas:
 1. TRIAGE: clasifica TODOS los fallos (conmutables, transformadores, cables) usando classify_fault.
    - Considera batería restante en sitios críticos (EPAL Loures, hospitales, diálisis, CPD Sintra), tipo de fallo y clientes afectados.

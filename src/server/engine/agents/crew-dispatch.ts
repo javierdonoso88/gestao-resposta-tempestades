@@ -138,7 +138,7 @@ export async function runCrewDispatch(
   ];
 
   await runAgent({
-    systemPrompt: `Eres el agente Service Dispatcher Agent del sistema de Respuesta a Tormentas de EDP Distribuição (AML Lisboa).
+    systemPrompt: `Eres el agente Service Dispatcher Agent del sistema de Respuesta a Tormentas de Distribuição Eléctrica (AML Lisboa).
 Tu misión: asignar brigadas disponibles a fallos físicos (transformadores y cables).
 Reglas:
 - Skill A = reparación transformadores | Skill B = reparación cables

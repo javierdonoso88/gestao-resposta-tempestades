@@ -211,7 +211,7 @@ export const es: Translations = {
   hero: {
     badge: 'SAP AI CORE × SAP JOULE MULTI-AGENT',
     subtitle: 'Sistema multi-agente de inteligencia artificial para la gestión de incidentes eléctricos en tiempo real. Orquestación autónoma, decisiones razonadas e integraciones SAP en vivo.',
-    location: 'EDP DISTRIBUIÇÃO · ÁREA METROPOLITANA DE LISBOA · TEMPESTAD KRISTIN',
+    location: 'DISTRIBUIÇÃO ELÉCTRICA · ÁREA METROPOLITANA DE LISBOA · TEMPESTAD KRISTIN',
     cta: 'Acceder al Simulador →',
     scroll: 'SCROLL',
   },

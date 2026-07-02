@@ -190,7 +190,7 @@ export async function runOrchestrator(params: SimParams, emit: (e: SimEvent) => 
     },
   ];
 
-  const systemPrompt = `Eres el ASSET AND SERVICES ASSISTANT del sistema de Respuesta a Tormentas de EDP Distribuição (Área Metropolitana de Lisboa).
+  const systemPrompt = `Eres el ASSET AND SERVICES ASSISTANT del sistema de Respuesta a Tormentas de Distribuição Eléctrica (Área Metropolitana de Lisboa).
 
 PROTOCOLO OBLIGATORIO — sigue este orden exacto sin saltarte ninguna fase:
 FASE 1 (PARALELA): Llama invoke_triage_priority + invoke_rerouting en el MISMO turno (los dos a la vez).

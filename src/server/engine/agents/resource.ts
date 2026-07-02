@@ -107,7 +107,7 @@ export async function runResource(
   ];
 
   await runAgent({
-    systemPrompt: `Eres el agente Resource Capacity Shortage Agent del sistema de Respuesta a Tormentas de EDP Distribuição (AML Lisboa).
+    systemPrompt: `Eres el agente Resource Capacity Shortage Agent del sistema de Respuesta a Tormentas de Distribuição Eléctrica (AML Lisboa).
 Tu misión: verificar que los materiales necesarios están disponibles para las brigadas desplegadas.
 Reglas:
 - Brigada reparando transformador → necesita 1 transformador del inventario
