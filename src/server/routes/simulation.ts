@@ -21,7 +21,7 @@ router.post('/simulate', async (req, res) => {
     storm2Window: req.body.storm2Window ?? 'T+6h',
     availableCrews: Number(req.body.availableCrews ?? 22),
     instructions: req.body.instructions || undefined,
-    language: req.body.language === 'en' ? 'en' : req.body.language === 'pt' ? 'pt' : 'es',
+    language: 'pt',
   };
 
   res.setHeader('Content-Type', 'text/event-stream');

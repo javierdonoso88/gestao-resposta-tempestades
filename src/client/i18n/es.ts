@@ -174,6 +174,7 @@ export interface Translations {
     analysisTitle: string; analysisEmpty: string;
     pendingTitle: string;
     pendingUnresolved: string;
+    pendingUnresolvedPlural: string;
     mitigationLabel: string;
     mitigationCritical: string;
     mitigationTransformer: string;
@@ -364,6 +365,7 @@ export const es: Translations = {
     analysisEmpty: 'Resumen del orquestrador no disponible.',
     pendingTitle: 'ACCIONES PENDIENTES',
     pendingUnresolved: 'fallo sin resolver',
+    pendingUnresolvedPlural: 'fallos sin resolver',
     mitigationLabel: 'Mitigación',
     mitigationCritical: 'Reasignar brigada con prioridad máxima. Considerar generador móvil como medida inmediata.',
     mitigationTransformer: 'Asignar brigada con Skill A. Si inventario agotado, activar protocolo de reposición urgente en SAP IBP.',

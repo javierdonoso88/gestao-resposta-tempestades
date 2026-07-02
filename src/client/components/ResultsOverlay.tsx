@@ -551,7 +551,7 @@ export function ResultsOverlay({ faults, totalClients, kpi, agentLogs, commsMess
               <div className="flex items-center gap-3 mb-3">
                 <div className="text-[10px] font-bold tracking-widest" style={{ color: 'var(--text-ghost)' }}>{t.results.pendingTitle}</div>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded" style={{ background: 'rgba(249,115,22,0.12)', color: '#f97316', border: '1px solid rgba(249,115,22,0.25)' }}>
-                  {pendingSorted.length} {t.results.pendingUnresolved}{pendingSorted.length > 1 ? 's' : ''}
+                  {pendingSorted.length} {pendingSorted.length > 1 ? t.results.pendingUnresolvedPlural : t.results.pendingUnresolved}
                 </span>
               </div>
               <div className="flex flex-col gap-2">

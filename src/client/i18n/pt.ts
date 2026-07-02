@@ -154,6 +154,7 @@ export const pt: Translations = {
     analysisEmpty: 'Resumo do orquestrador não disponível.',
     pendingTitle: 'AÇÕES PENDENTES',
     pendingUnresolved: 'falha por resolver',
+    pendingUnresolvedPlural: 'falhas por resolver',
     mitigationLabel: 'Mitigação',
     mitigationCritical: 'Reatribuir brigada com prioridade máxima. Considerar gerador móvel como medida imediata.',
     mitigationTransformer: 'Atribuir brigada com Skill A. Se inventário esgotado, ativar protocolo de reposição urgente em SAP IBP.',

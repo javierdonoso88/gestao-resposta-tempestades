@@ -154,6 +154,7 @@ export const en: Translations = {
     analysisEmpty: 'Orchestrator summary not available.',
     pendingTitle: 'PENDING ACTIONS',
     pendingUnresolved: 'unresolved fault',
+    pendingUnresolvedPlural: 'unresolved faults',
     mitigationLabel: 'Mitigation',
     mitigationCritical: 'Reassign crew with maximum priority. Consider mobile generator as immediate measure.',
     mitigationTransformer: 'Assign Skill A crew. If inventory exhausted, activate urgent replenishment protocol in SAP IBP.',

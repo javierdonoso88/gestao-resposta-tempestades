@@ -3,7 +3,6 @@ import { Fault, SimParams } from './types';
 import { useSimulation } from './hooks/useSimulation';
 import { useTheme } from './contexts/ThemeContext';
 import { Theme } from './contexts/ThemeContext';
-import { useLanguage } from './contexts/LanguageContext';
 import { useT } from './i18n';
 import { ParametersPanel } from './components/ParametersPanel';
 import { LogPanel } from './components/LogPanel';
@@ -28,13 +27,10 @@ export default function App() {
   const [showLanding, setShowLanding] = useState(true);
   const [showResults, setShowResults] = useState(false);
   const [showThemePicker, setShowThemePicker] = useState(false);
-  const [showLangPicker, setShowLangPicker] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const themePickerRef = useRef<HTMLDivElement>(null);
-  const langPickerRef = useRef<HTMLDivElement>(null);
   const { theme, setTheme } = useTheme();
-  const { lang, setLang, cycleLang } = useLanguage();
   const t = useT();
 
   const { state, startSimulation, tickAgentProgress } = useSimulation(initialFaults);
@@ -49,17 +45,6 @@ export default function App() {
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, [showThemePicker]);
-
-  useEffect(() => {
-    if (!showLangPicker) return;
-    function handleClick(e: MouseEvent) {
-      if (langPickerRef.current && !langPickerRef.current.contains(e.target as Node)) {
-        setShowLangPicker(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, [showLangPicker]);
 
   useEffect(() => {
     fetch('/api/scenario').then(r => r.json()).then(d => {
@@ -142,46 +127,6 @@ export default function App() {
               }} />
           </div>
           <span className="text-xs font-mono whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>{state.elapsedLabel}</span>
-        </div>
-
-        {/* Language picker dropdown */}
-        <div className="relative flex-shrink-0" ref={langPickerRef}>
-          <button
-            onClick={() => setShowLangPicker(v => !v)}
-            className="flex items-center gap-1.5 px-2.5 h-7 rounded-lg text-xs font-medium"
-            style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', color: 'var(--text-muted)', cursor: 'pointer' }}
-          >
-            <span>{lang === 'es' ? '🇪🇸' : lang === 'en' ? '🇬🇧' : '🇵🇹'}</span>
-            <span>{lang === 'es' ? 'ES' : lang === 'en' ? 'EN' : 'PT'}</span>
-            <svg width="8" height="5" viewBox="0 0 8 5" fill="currentColor"><path d="M0 0l4 5 4-5z"/></svg>
-          </button>
-          {showLangPicker && (
-            <div
-              className="absolute right-0 top-full mt-1 rounded-lg overflow-hidden z-[9000]"
-              style={{ background: 'var(--bg-panel)', border: '1px solid var(--border-accent)', boxShadow: '0 8px 24px rgba(0,0,0,0.2)', minWidth: 120 }}
-            >
-              {([
-                { value: 'es', icon: '🇪🇸', label: 'ES' },
-                { value: 'en', icon: '🇬🇧', label: 'EN' },
-                { value: 'pt', icon: '🇵🇹', label: 'PT' },
-              ] as { value: 'es' | 'en' | 'pt'; icon: string; label: string }[]).map(opt => (
-                <button
-                  key={opt.value}
-                  onClick={() => { setLang(opt.value); setShowLangPicker(false); }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-xs text-left transition-colors"
-                  style={{
-                    background: lang === opt.value ? 'var(--accent-subtle)' : 'transparent',
-                    color: lang === opt.value ? 'var(--accent)' : 'var(--text-secondary)',
-                    cursor: 'pointer',
-                  }}
-                >
-                  <span>{opt.icon}</span>
-                  <span className="font-medium">{opt.label}</span>
-                  {lang === opt.value && <span className="ml-auto opacity-70">✓</span>}
-                </button>
-              ))}
-            </div>
-          )}
         </div>
 
         {/* Theme picker dropdown */}
@@ -277,7 +222,7 @@ export default function App() {
             <ParametersPanel
               params={params}
               onChange={p => setParams(prev => ({ ...prev, ...p }))}
-              onSimulate={() => { setShowResults(false); startSimulation(params, lang); }}
+              onSimulate={() => { setShowResults(false); startSimulation(params, 'pt'); }}
               running={state.running}
               kpi={state.kpi}
               drolius={state.drolius}
