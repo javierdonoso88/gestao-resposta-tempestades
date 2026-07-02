@@ -2,7 +2,7 @@ import type { Translations } from './es';
 
 export const pt: Translations = {
   lang: {},
-  themes: { dark: 'Escuro', joule: 'SAP Joule', edp: 'EDP' },
+  themes: { dark: 'Escuro', joule: 'Roxo', edp: 'Verde' },
   nav: { openSimulator: 'Abrir Simulador →', back: 'Início' },
   hero: {
     badge: 'SAP AI CORE × SAP JOULE MULTI-AGENT',
