@@ -303,7 +303,7 @@ export function ResultsOverlay({ faults, totalClients, kpi, agentLogs, commsMess
 </head>
 <body>
   <h1>${t.results.pdfTitle}</h1>
-  <div class="subtitle">${t.app.title} · EDP · Área Metropolitana de Lisboa · ${t.results.completed} · ${elapsedLabel}</div>
+  <div class="subtitle">${t.app.title} · Área Metropolitana de Lisboa · ${t.results.completed} · ${elapsedLabel}</div>
 
   <div class="section-label">${t.results.pdfKpis}</div>
   <div class="kpi-row">
@@ -393,7 +393,7 @@ export function ResultsOverlay({ faults, totalClients, kpi, agentLogs, commsMess
   ` : ''}
 
   <div class="footer">
-    <span>${t.app.title} · EDP · Área Metropolitana de Lisboa</span>
+    <span>${t.app.title} · Área Metropolitana de Lisboa</span>
     <span>${t.results.pdfGenerated} ${new Date().toLocaleString(t.lang.toggle === 'ES' ? 'en-GB' : 'es-ES')}</span>
   </div>
 </body>
@@ -595,7 +595,7 @@ export function ResultsOverlay({ faults, totalClients, kpi, agentLogs, commsMess
         <div className="flex items-center justify-between px-6 py-4 flex-shrink-0 mt-auto" style={{ borderTop: '1px solid var(--border)' }}>
           <div className="flex items-center gap-2">
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/SAP_2011_logo.svg/1280px-SAP_2011_logo.svg.png" alt="SAP" style={{ height: 13, opacity: 0.25 }} />
-            <span className="text-[11px] font-mono" style={{ color: 'var(--text-ghost)' }}>{t.app.title} · EDP · Área Metropolitana de Lisboa</span>
+            <span className="text-[11px] font-mono" style={{ color: 'var(--text-ghost)' }}>{t.app.title} · Área Metropolitana de Lisboa</span>
           </div>
           <div className="flex items-center gap-2">
             <button

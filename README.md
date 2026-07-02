@@ -1,4 +1,4 @@
-# ⚡ Gestão de Resposta a Tempestades — EDP
+# ⚡ Gestão de Resposta a Tempestades
 
 Multi-agent AI simulation system for storm-driven electrical incident response. Models the real-world operations of Distribuição Eléctrica in the Área Metropolitana de Lisboa: Storm Kristin with 120 km/h gusts, 47 active faults, 22 field crews across 6 bases, critical sites on limited battery, and eucalyptus trees down on MV overhead lines in Sintra and Arrábida. The application is in European Portuguese.
 
@@ -14,7 +14,7 @@ Multi-agent AI simulation system for storm-driven electrical incident response. 
 
 Opening the app shows a **landing page** with the use case, key scenario metrics, and the multi-agent architecture. From there you enter the interactive simulator, with a back-to-landing button in the header at any time.
 
-The header includes a **theme dropdown** with three options: **Dark** (navy/cyan), **SAP Joule** (light grey, purple `#6d28d9` accent), and **EDP** (light green, `#00a651` accent). The preference is persisted in `localStorage`.
+The header includes a **theme dropdown** with three options: **Dark** (navy/cyan), **SAP Joule** (light grey, purple `#6d28d9` accent), and **Verde** (light green, `#00a651` accent). The preference is persisted in `localStorage`.
 
 The application is **Portuguese-only**. All UI text, AI agent output, SAP action messages, and the executive report (screen and PDF) are generated in European Portuguese.
 
@@ -116,8 +116,8 @@ See [docs/architecture.md](docs/architecture.md) for full technical detail.
 **Requirements**: Node.js ≥ 18, SAP AI Core access
 
 ```bash
-git clone https://github.tools.sap/I572394/EDP-Storm-Response
-cd EDP-Storm-Response
+git clone https://github.tools.sap/I572394/gestao-resposta-tempestades
+cd gestao-resposta-tempestades
 npm install
 ```
 
@@ -180,7 +180,7 @@ src/
 ├── client/
 │   ├── App.tsx                  # Main layout, landing↔simulator nav, theme selector
 │   ├── contexts/
-│   │   ├── ThemeContext.tsx      # Dark / Joule / EDP themes — CSS vars + localStorage
+│   │   ├── ThemeContext.tsx      # Dark / Joule / Verde themes — CSS vars + localStorage
 │   │   └── LanguageContext.tsx   # Fixed Portuguese context (no switching)
 │   ├── i18n/
 │   │   ├── pt.ts                # ~320 strings in European Portuguese

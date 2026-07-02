@@ -213,7 +213,7 @@ export interface Translations {
 
 export const es: Translations = {
   lang: {},
-  themes: { dark: 'Oscuro', joule: 'SAP Joule', edp: 'EDP' },
+  themes: { dark: 'Oscuro', joule: 'SAP Joule', edp: 'Verde' },
   nav: { openSimulator: 'Abrir Simulador →', back: 'Inicio' },
   hero: {
     badge: 'SAP AI CORE × SAP JOULE MULTI-AGENT',

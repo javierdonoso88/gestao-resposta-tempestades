@@ -212,13 +212,13 @@ Estimated interruption times per status: restored (SCADA) = 10 min · crew-en-ro
 
 ---
 
-## Theme system (Dark / Joule / EDP)
+## Theme system (Dark / Joule / Verde)
 
 | Theme | Background | Border | Accent |
 |-------|-----------|--------|--------|
 | Dark (default) | `#0d1520` navy | `#1e2d45` | `#22d3ee` cyan |
 | SAP Joule | `#f3f5f8` light grey | `#dde3ec` | `#6d28d9` SAP purple |
-| EDP | `#f2f7f4` light green | `#c8ddd0` | `#00a651` EDP green |
+| Verde | `#f2f7f4` light green | `#c8ddd0` | `#00a651` green |
 
 - `ThemeContext.tsx` persists choice in `localStorage('src-theme')` and writes `data-theme` on `document.documentElement`.
 - `globals.css` defines CSS variable overrides for each theme.
