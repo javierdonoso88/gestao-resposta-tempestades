@@ -87,29 +87,31 @@ export async function runTriagePriority(
   ];
 
   await runAgent({
-    systemPrompt: `Eres el agente Technician Briefing Agent del sistema de Respuesta a Tormentas de Distribuição Eléctrica (AML Lisboa).
-Tu misión tiene dos etapas:
-1. TRIAGE: clasifica TODOS los fallos (conmutables, transformadores, cables) usando classify_fault.
-   - Considera batería restante en sitios críticos (EPAL Loures, hospitales, diálisis, CPD Sintra), tipo de fallo y clientes afectados.
-   - Los transformadores en Sintra y Arrábida son los más difíciles de acceder — eucaliptos en la EN9 y EN247.
-2. PRIORITY: una vez clasificados todos, rankea los fallos FÍSICOS (transformadores y cables) usando set_priority.
-   - Sitios críticos con menor batería tienen máxima prioridad (batería ASC, clientes DESC).
-   - EPAL Loures (agua para 800.000 personas) debe recibir rango 1 si batería < 60 min.
-Al finalizar ambas etapas llama a complete_assessment con el resumen ejecutivo.
-${params.language === 'pt' ? 'Responde em Português Europeu.' : params.language === 'en' ? 'Respond in English.' : 'Responde en español.'} Sé analítico y operacional.`,
-    userMessage: `INFORME DE INCIDENTE — Área Metropolitana de Lisboa — Tempestade Kristin
-SLA objetivo: ${params.minuteSLA} min | Ventana tormenta 2: ${params.storm2Window}
-Piezas limitadas: ${params.limitedParts === 1 ? 'SÍ — solo 1 transformador disponible' : 'NO'}
-CONTEXTO: Red subterránea Lisboa (conmutables rápidos) + líneas MT aéreas Sintra/Arrábida (eucaliptos caídos)
-Brigadas margem sul (Almada/Setúbal) pueden tener +20 min de ETA por congestión en Ponte 25 de Abril.
+    systemPrompt: `És o agente Technician Briefing Agent do sistema de Gestão de Resposta a Tempestades da Distribuição Eléctrica (AML Lisboa).
+A tua missão tem duas etapas:
+1. TRIAGE: classifica TODAS as falhas (comutáveis, transformadores, cabos) usando classify_fault.
+   - Considera bateria restante em locais críticos (EPAL Loures, hospitais, diálise, CPD Sintra), tipo de falha e clientes afetados.
+   - Os transformadores em Sintra e Arrábida são os mais difíceis de aceder — eucaliptos na EN9 e EN247.
+2. PRIORITY: após classificar todas, ordena as falhas FÍSICAS (transformadores e cabos) usando set_priority.
+   - Locais críticos com menos bateria têm prioridade máxima (bateria ASC, clientes DESC).
+   - EPAL Loures (água para 800.000 pessoas) deve receber rank 1 se bateria < 60 min.
+Após terminar ambas as etapas chama complete_assessment com o resumo executivo.
+REGRA DE IDIOMA CRÍTICA: DEVES escrever TODA a saída em Português Europeu. Sê analítico e operacional.`,
+    userMessage: `[RESPONDE APENAS EM PORTUGUÊS EUROPEU]
 
-TODOS LOS FALLOS ACTIVOS (${state.faults.length} total):
+RELATÓRIO DE INCIDENTE — Área Metropolitana de Lisboa — Tempestade Kristin
+SLA objetivo: ${params.minuteSLA} min | Janela tempestade 2: ${params.storm2Window}
+Peças limitadas: ${params.limitedParts === 1 ? 'SIM — apenas 1 transformador disponível' : 'NÃO'}
+CONTEXTO: Rede subterrânea Lisboa (comutáveis rápidos) + linhas MT aéreas Sintra/Arrábida (eucaliptos caídos)
+Brigadas margem sul (Almada/Setúbal) podem ter +20 min de ETA por congestionamento na Ponte 25 de Abril.
+
+TODAS AS FALHAS ATIVAS (${state.faults.length} total):
 ${faultList}
 
-INSTRUCCIONES:
-1. Llama a classify_fault para CADA uno de los ${state.faults.length} fallos.
-2. Llama a set_priority para cada uno de los ${physicalFaults.length} fallos físicos (transformadores y cables).
-3. Llama a complete_assessment con el resumen.${params.instructions?.trim() ? `\n\nINSTRUCCIONES DEL OPERADOR (aplica en tu análisis):\n${params.instructions.trim()}` : ''}`,
+INSTRUÇÕES:
+1. Chama classify_fault para CADA uma das ${state.faults.length} falhas.
+2. Chama set_priority para cada uma das ${physicalFaults.length} falhas físicas (transformadores e cabos).
+3. Chama complete_assessment com o resumo.${params.instructions?.trim() ? `\n\nINSTRUÇÕES DO OPERADOR (aplica na tua análise):\n${params.instructions.trim()}` : ''}`,
     tools,
     emit,
     agentId: 'triage-priority',

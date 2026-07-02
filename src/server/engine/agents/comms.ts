@@ -103,26 +103,28 @@ export async function runComms(
   ];
 
   await runAgent({
-    systemPrompt: `Eres el agente Communications Insight Agent del sistema de Respuesta a Tormentas de Distribuição Eléctrica (AML Lisboa).
-Tu misión: redactar y enviar 3 comunicaciones obligatorias en este orden:
-1. send_sms: conciso (≤160 chars), menciona Distribuição Eléctrica, número de clientes y tiempo estimado de restauración
-2. send_press_release: comunicado formal para medios de Lisboa (Público, Expresso, RTP, SIC Notícias, TSF, Rádio Renascença). Redáctalo en portugués europeo.
-3. send_regulatory: notificación técnica formal para ERSE (regulador energético PT) y ANPC (Proteção Civil) con datos del incidente${hadConflict ? '\nIMPORTANTE: Hay conflicto de recursos (material limitado). Menciónalo en la notificación regulatoria.' : ''}${criticalAtRisk.length > 0 ? `\nALERTA: ${criticalAtRisk.length} sitio(s) crítico(s) con batería bajo el umbral SLA. Especialmente EPAL Loures (afecta abastecimiento de agua a 800.000 personas). Menciónalo en la notificación a ERSE y ANPC.` : ''}
-Llama a send_sms, send_press_release y send_regulatory (en ese orden), luego complete_comms.
-${params.language === 'pt' ? 'Responde em Português Europeu.' : params.language === 'en' ? 'Respond in English.' : 'Responde en español/portugués según el canal.'} Sé profesional y preciso.`,
-    userMessage: `SITUACIÓN ACTUAL DEL INCIDENTE — Área Metropolitana de Lisboa — Tempestade Kristin
+    systemPrompt: `És o agente Communications Insight Agent do sistema de Gestão de Resposta a Tempestades da Distribuição Eléctrica (AML Lisboa).
+A tua missão: redigir e enviar 3 comunicações obrigatórias por esta ordem:
+1. send_sms: conciso (≤160 chars), menciona Distribuição Eléctrica, número de clientes e tempo estimado de restauro
+2. send_press_release: comunicado formal para media de Lisboa (Público, Expresso, RTP, SIC Notícias, TSF, Rádio Renascença). Redige em Português Europeu.
+3. send_regulatory: notificação técnica formal para ERSE (regulador energético PT) e ANPC (Proteção Civil) com dados do incidente${hadConflict ? '\nIMPORTANTE: Há conflito de recursos (material limitado). Menciona na notificação regulatória.' : ''}${criticalAtRisk.length > 0 ? `\nALERTA: ${criticalAtRisk.length} local(ais) crítico(s) com bateria abaixo do limiar SLA. Especialmente EPAL Loures (afeta abastecimento de água a 800.000 pessoas). Menciona na notificação à ERSE e ANPC.` : ''}
+Chama send_sms, send_press_release e send_regulatory (por esta ordem), depois complete_comms.
+REGRA DE IDIOMA CRÍTICA: DEVES escrever TODA a saída em Português Europeu. Sê profissional e preciso.`,
+    userMessage: `[RESPONDE APENAS EM PORTUGUÊS EUROPEU]
 
-Fallos totales      : ${state.faults.length}
-Restaurados telecon.: ${restoredFaults.length} (${restoredClients.toLocaleString()} clientes reconectados)
-Brigadas en camino  : ${crewEnRouteFaults.length} fallos en atención activa
-Clientes afectados  : ${state.totalClients.toLocaleString()} total
-Sitios críticos     : ${criticalFaults.length} (${criticalFaults.map(f => `${f.criticalSite} batería:${f.batteryMinutes ?? 'N/A'}min`).join(', ') || 'ninguno'})
-${criticalAtRisk.length > 0 ? `⚠️ SITIOS CON BATERÍA CRÍTICA (<${params.minuteSLA}min): ${criticalAtRisk.map(f => f.criticalSite).join(', ')}` : '✓ Todos los sitios críticos dentro del margen de batería'}
-${hadConflict ? '⚠️ CONFLICTO DE RECURSOS: transformadores insuficientes — protocolo de priorización activado' : '✓ Sin conflictos de recursos'}
+SITUAÇÃO ATUAL DO INCIDENTE — Área Metropolitana de Lisboa — Tempestade Kristin
 
-SLA objetivo: ${params.minuteSLA}min | Ventana tormenta 2: ${params.storm2Window}
+Falhas totais       : ${state.faults.length}
+Restauradas telecom.: ${restoredFaults.length} (${restoredClients.toLocaleString()} clientes reconectados)
+Brigadas a caminho  : ${crewEnRouteFaults.length} falhas em atendimento ativo
+Clientes afetados   : ${state.totalClients.toLocaleString()} total
+Locais críticos     : ${criticalFaults.length} (${criticalFaults.map(f => `${f.criticalSite} bateria:${f.batteryMinutes ?? 'N/A'}min`).join(', ') || 'nenhum'})
+${criticalAtRisk.length > 0 ? `⚠️ LOCAIS COM BATERIA CRÍTICA (<${params.minuteSLA}min): ${criticalAtRisk.map(f => f.criticalSite).join(', ')}` : '✓ Todos os locais críticos dentro da margem de bateria'}
+${hadConflict ? '⚠️ CONFLITO DE RECURSOS: transformadores insuficientes — protocolo de priorização ativado' : '✓ Sem conflitos de recursos'}
 
-Redacta y envía las 3 comunicaciones con send_sms, send_press_release, send_regulatory, luego complete_comms.${params.instructions?.trim() ? `\n\nINSTRUCCIONES DEL OPERADOR (refleja en el tono y contenido de las comunicaciones):\n${params.instructions.trim()}` : ''}`,
+SLA objetivo: ${params.minuteSLA}min | Janela tempestade 2: ${params.storm2Window}
+
+Redige e envia as 3 comunicações com send_sms, send_press_release, send_regulatory, depois complete_comms.${params.instructions?.trim() ? `\n\nINSTRUÇÕES DO OPERADOR (reflete no tom e conteúdo das comunicações):\n${params.instructions.trim()}` : ''}`,
     tools,
     emit,
     agentId: 'comms',

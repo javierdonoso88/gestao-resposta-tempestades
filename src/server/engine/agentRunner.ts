@@ -24,22 +24,14 @@ export async function runAgent(opts: {
   const { systemPrompt, userMessage, tools, emit, agentId, maxTokens = 4096, maxTurns = 15, haiku = false, instructions, language } = opts;
   const modelName = haiku ? MODEL_HAIKU : MODEL_SONNET;
 
-  const langInstruction = language === 'en'
-    ? 'CRITICAL LANGUAGE RULE: You MUST write ALL your output in English — reasoning, analysis, tool call text fields, summaries, and any narrative. Do NOT use Spanish or Portuguese under any circumstances.'
-    : language === 'pt'
-    ? 'REGRA DE IDIOMA CRÍTICA: DEVES escrever TODA a saída em Português Europeu — raciocínio, análise, campos de texto das ferramentas, resumos e qualquer narrativa. NÃO uses Espanhol nem Inglês em nenhuma circunstância.'
-    : 'REGLA DE IDIOMA: Responde completamente en español.';
+  const langInstruction = 'REGRA DE IDIOMA CRÍTICA: DEVES escrever TODA a saída em Português Europeu — raciocínio, análise, campos de texto das ferramentas, resumos e qualquer narrativa. NÃO uses Espanhol nem Inglês em nenhuma circunstância.';
 
   const effectiveSystem = instructions?.trim()
-    ? `INSTRUCCIONES OBLIGATORIAS DEL OPERADOR (máxima prioridad — aplícalas en todas tus decisiones):\n${instructions.trim()}\n\n---\n\n${langInstruction}\n\n---\n\n${systemPrompt}\n\n---\n\n${langInstruction}`
+    ? `INSTRUÇÕES OBRIGATÓRIAS DO OPERADOR (prioridade máxima — aplica em todas as tuas decisões):\n${instructions.trim()}\n\n---\n\n${langInstruction}\n\n---\n\n${systemPrompt}\n\n---\n\n${langInstruction}`
     : `${langInstruction}\n\n---\n\n${systemPrompt}\n\n---\n\n${langInstruction}`;
 
-  // Also prepend language instruction to userMessage so it appears in both system and user turn
-  const effectiveUserMessage = language === 'en'
-    ? `[RESPOND IN ENGLISH ONLY]\n\n${userMessage}`
-    : language === 'pt'
-    ? `[RESPONDE APENAS EM PORTUGUÊS EUROPEU]\n\n${userMessage}`
-    : userMessage;
+  // Prepend language instruction to userMessage so it appears in both system and user turn
+  const effectiveUserMessage = `[RESPONDE APENAS EM PORTUGUÊS EUROPEU]\n\n${userMessage}`;
 
   const sdkTools: Anthropic.Tool[] = tools.map(t => ({
     name: t.name,

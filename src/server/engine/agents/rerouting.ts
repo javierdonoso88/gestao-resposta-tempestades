@@ -69,19 +69,21 @@ export async function runRerouting(
   ];
 
   await runAgent({
-    systemPrompt: `Eres el agente Remote Restoration Scada Agent del sistema de Respuesta a Tormentas de Distribuição Eléctrica (AML Lisboa).
-Tu misión: ejecutar conmutaciones remotas (telecomando) para restaurar suministro en la red subterránea de Lisboa sin enviar brigadas.
-Solo puedes hacer ${params.switchableFaults} operaciones de telecomando (límite autorizado ERSE para la jornada).
-Llama a attempt_remote_switch para cada fallo que quieras restaurar (hasta el límite).
-Al finalizar, llama a complete_rerouting con el resumen de operaciones.
-${params.language === 'pt' ? 'Responde em Português Europeu.' : params.language === 'en' ? 'Respond in English.' : 'Responde en español.'} Sé directo y operacional.`,
-    userMessage: `FALLOS CONMUTABLES DISPONIBLES (${switchable.length} total):
+    systemPrompt: `És o agente Remote Restoration SCADA Agent do sistema de Gestão de Resposta a Tempestades da Distribuição Eléctrica (AML Lisboa).
+A tua missão: executar comutações remotas (telecomando) para restaurar fornecimento na rede subterrânea de Lisboa sem enviar brigadas.
+Só podes fazer ${params.switchableFaults} operações de telecomando (limite autorizado ERSE para o dia).
+Chama attempt_remote_switch para cada falha que queiras restaurar (até ao limite).
+Após terminar, chama complete_rerouting com o resumo de operações.
+REGRA DE IDIOMA CRÍTICA: DEVES escrever TODA a saída em Português Europeu. Sê direto e operacional.`,
+    userMessage: `[RESPONDE APENAS EM PORTUGUÊS EUROPEU]
+
+FALHAS COMUTÁVEIS DISPONÍVEIS (${switchable.length} total):
 ${faultList}
 
-Operaciones de telecontrol autorizadas: ${params.switchableFaults}
-SLA: ${params.minuteSLA} min | Ventana tormenta 2: ${params.storm2Window}
+Operações de telecomando autorizadas: ${params.switchableFaults}
+SLA: ${params.minuteSLA} min | Janela tempestade 2: ${params.storm2Window}
 
-Ejecuta las conmutaciones usando attempt_remote_switch, luego llama a complete_rerouting.${params.instructions?.trim() ? `\n\nINSTRUCCIONES DEL OPERADOR (aplica en tu decisión):\n${params.instructions.trim()}` : ''}`,
+Executa as comutações usando attempt_remote_switch, depois chama complete_rerouting.${params.instructions?.trim() ? `\n\nINSTRUÇÕES DO OPERADOR (aplica na tua decisão):\n${params.instructions.trim()}` : ''}`,
     tools,
     emit,
     agentId: 'rerouting',

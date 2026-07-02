@@ -190,43 +190,41 @@ export async function runOrchestrator(params: SimParams, emit: (e: SimEvent) => 
     },
   ];
 
-  const systemPrompt = `Eres el ASSET AND SERVICES ASSISTANT del sistema de Respuesta a Tormentas de Distribuição Eléctrica (Área Metropolitana de Lisboa).
+  const systemPrompt = `És o ASSET AND SERVICES ASSISTANT do sistema de Gestão de Resposta a Tempestades da Distribuição Eléctrica (Área Metropolitana de Lisboa).
 
-PROTOCOLO OBLIGATORIO — sigue este orden exacto sin saltarte ninguna fase:
-FASE 1 (PARALELA): Llama invoke_triage_priority + invoke_rerouting en el MISMO turno (los dos a la vez).
-FASE 2 (SECUENCIAL): Llama invoke_crew_dispatch (solo), luego invoke_resource (solo), luego invoke_comms (solo).
-CIERRE: Llama finalize.
+PROTOCOLO OBRIGATÓRIO — segue esta ordem exata sem saltar nenhuma fase:
+FASE 1 (PARALELA): Chama invoke_triage_priority + invoke_rerouting no MESMO turno (os dois ao mesmo tempo).
+FASE 2 (SEQUENCIAL): Chama invoke_crew_dispatch (só), depois invoke_resource (só), depois invoke_comms (só).
+ENCERRAMENTO: Chama finalize.
 
-IMPORTANTE: Tras recibir los resultados de cada fase, llama INMEDIATAMENTE a la siguiente herramienta.
-No escribas análisis extensos entre fases — una frase de transición es suficiente.
-Nunca omitas invoke_crew_dispatch, invoke_resource ni invoke_comms.
-${params.language === 'en'
-  ? 'CRITICAL LANGUAGE RULE: You MUST write ALL output in English — every transition phrase, every summary, every reasoning step. No Spanish allowed.'
-  : params.language === 'pt'
-  ? 'REGRA DE IDIOMA CRÍTICA: DEVES escrever TODA a saída em Português Europeu — cada frase de transição, cada resumo, cada passo de raciocínio. Não uses Espanhol nem Inglês.'
-  : 'Responde en español.'}`;
+IMPORTANTE: Após receber os resultados de cada fase, chama IMEDIATAMENTE a ferramenta seguinte.
+Não escreves análises extensas entre fases — uma frase de transição é suficiente.
+Nunca omitas invoke_crew_dispatch, invoke_resource nem invoke_comms.
+REGRA DE IDIOMA CRÍTICA: DEVES escrever TODA a saída em Português Europeu — cada frase de transição, cada resumo, cada passo de raciocínio. Não uses Espanhol nem Inglês.`;
 
-  const userMessage = `${params.language === 'en' ? '[RESPOND IN ENGLISH ONLY]\n\n' : params.language === 'pt' ? '[RESPONDE APENAS EM PORTUGUÊS EUROPEU]\n\n' : ''}INCIDENTE ACTIVO — Área Metropolitana de Lisboa — T+00:00
+  const userMessage = `[RESPONDE APENAS EM PORTUGUÊS EUROPEU]
 
-PARÁMETROS:
+INCIDENTE ATIVO — Área Metropolitana de Lisboa — T+00:00
+
+PARÂMETROS:
   SLA objetivo        : ${params.minuteSLA} minutos
-  Fallos conmutables  : ${params.switchableFaults}
-  Inventario piezas   : ${params.limitedParts === 1 ? 'LIMITADO (1 transformador)' : 'COMPLETO'}
-  Ventana tormenta 2  : ${params.storm2Window}
-  Brigadas disponibles: ${params.availableCrews}
+  Falhas comutáveis   : ${params.switchableFaults}
+  Inventário peças    : ${params.limitedParts === 1 ? 'LIMITADO (1 transformador)' : 'COMPLETO'}
+  Janela tempestade 2 : ${params.storm2Window}
+  Brigadas disponíveis: ${params.availableCrews}
 
-ESCENARIO:
-  Fallos activos      : ${state.faults.length} total
-  - Conmutables       : ${state.faults.filter(f => f.type === 'switchable').length}
+CENÁRIO:
+  Falhas ativas       : ${state.faults.length} total
+  - Comutáveis        : ${state.faults.filter(f => f.type === 'switchable').length}
   - Transformadores   : ${state.faults.filter(f => f.type === 'transformer').length}
-  - Cables            : ${state.faults.filter(f => f.type === 'cable').length}
-  Sitios críticos     : ${state.faults.filter(f => f.criticalSite).length}
-  Clientes afectados  : ${state.totalClients.toLocaleString()}
+  - Cabos             : ${state.faults.filter(f => f.type === 'cable').length}
+  Locais críticos     : ${state.faults.filter(f => f.criticalSite).length}
+  Clientes afetados   : ${state.totalClients.toLocaleString()}
 ${params.instructions?.trim() ? `
-INSTRUCCIONES DEL OPERADOR (prioridad máxima — ajusta tu razonamiento y el de los agentes en consecuencia):
+INSTRUÇÕES DO OPERADOR (prioridade máxima — ajusta o teu raciocínio e o dos agentes em conformidade):
 ${params.instructions.trim()}
 ` : ''}
-Inicia el protocolo: llama invoke_triage_priority + invoke_rerouting en el MISMO turno.`;
+Inicia o protocolo: chama invoke_triage_priority + invoke_rerouting no MESMO turno.`;
 
   const messages: Anthropic.MessageParam[] = [{ role: 'user', content: userMessage }];
 

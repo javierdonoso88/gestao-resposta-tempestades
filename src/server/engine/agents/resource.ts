@@ -107,30 +107,32 @@ export async function runResource(
   ];
 
   await runAgent({
-    systemPrompt: `Eres el agente Resource Capacity Shortage Agent del sistema de Respuesta a Tormentas de Distribuição Eléctrica (AML Lisboa).
-Tu misión: verificar que los materiales necesarios están disponibles para las brigadas desplegadas.
-Reglas:
-- Brigada reparando transformador → necesita 1 transformador del inventario
-- Brigada reparando cable → necesita 1 bobina de cable del inventario
-- Si inventario insuficiente → llama flag_conflict para los fallos que no pueden ser atendidos
-- REGLA DE ORO: Technician Briefing Agent prevalece — EPAL Loures y hospitales tienen prioridad absoluta sobre material disponible
-- Puedes asignar generadores móviles (mobile_generator) como medida temporal para sitios críticos sin transformador disponible
-Llama a allocate_resource para cada asignación posible, flag_conflict si hay déficit, luego complete_resources.
-${params.language === 'pt' ? 'Responde em Português Europeu.' : params.language === 'en' ? 'Respond in English.' : 'Responde en español.'} Sé preciso.`,
-    userMessage: `FALLOS CON BRIGADA EN CAMINO (${deployedFaults.length} total):
-${faultInfo || 'Ningún fallo con brigada asignada'}
+    systemPrompt: `És o agente Resource Capacity Shortage Agent do sistema de Gestão de Resposta a Tempestades da Distribuição Eléctrica (AML Lisboa).
+A tua missão: verificar que os materiais necessários estão disponíveis para as brigadas despachadas.
+Regras:
+- Brigada a reparar transformador → necessita 1 transformador do inventário
+- Brigada a reparar cabo → necessita 1 bobina de cabo do inventário
+- Se inventário insuficiente → chama flag_conflict para as falhas que não podem ser atendidas
+- REGRA DE OURO: Technician Briefing Agent prevalece — EPAL Loures e hospitais têm prioridade absoluta sobre material disponível
+- Podes atribuir geradores móveis (mobile_generator) como medida temporária para locais críticos sem transformador disponível
+Chama allocate_resource para cada atribuição possível, flag_conflict se há défice, depois complete_resources.
+REGRA DE IDIOMA CRÍTICA: DEVES escrever TODA a saída em Português Europeu. Sê preciso.`,
+    userMessage: `[RESPONDE APENAS EM PORTUGUÊS EUROPEU]
 
-INVENTARIO ACTUAL:
+FALHAS COM BRIGADA A CAMINHO (${deployedFaults.length} total):
+${faultInfo || 'Nenhuma falha com brigada atribuída'}
+
+INVENTÁRIO ATUAL:
   Transformadores : ${state.inventory.transformers} unidades
-  Cables (bobinas): ${state.inventory.cables} unidades
-  Gen. móviles    : ${state.inventory.mobileGenerators} unidades
+  Cabos (bobinas) : ${state.inventory.cables} unidades
+  Gen. móveis     : ${state.inventory.mobileGenerators} unidades
 
-DEMANDA:
-  Transformadores necesarios: ${trfFaults.length}
-  Cables necesarios         : ${cableFaults.length}
-${params.limitedParts === 1 ? `⚠️ INVENTARIO LIMITADO: solo ${state.inventory.transformers} transformador(es) disponible(s) para ${trfFaults.length} fallo(s)` : '✓ Inventario completo'}
+PROCURA:
+  Transformadores necessários: ${trfFaults.length}
+  Cabos necessários          : ${cableFaults.length}
+${params.limitedParts === 1 ? `⚠️ INVENTÁRIO LIMITADO: apenas ${state.inventory.transformers} transformador(es) disponível(eis) para ${trfFaults.length} falha(s)` : '✓ Inventário completo'}
 
-Asigna recursos con allocate_resource, registra conflictos con flag_conflict si hay déficit, luego complete_resources.${params.instructions?.trim() ? `\n\nINSTRUCCIONES DEL OPERADOR (aplica en la priorización de material):\n${params.instructions.trim()}` : ''}`,
+Atribui recursos com allocate_resource, regista conflitos com flag_conflict se há défice, depois complete_resources.${params.instructions?.trim() ? `\n\nINSTRUÇÕES DO OPERADOR (aplica na priorização de material):\n${params.instructions.trim()}` : ''}`,
     tools,
     emit,
     agentId: 'resource',

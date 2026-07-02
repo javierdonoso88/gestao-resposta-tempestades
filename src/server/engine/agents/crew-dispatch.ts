@@ -138,30 +138,32 @@ export async function runCrewDispatch(
   ];
 
   await runAgent({
-    systemPrompt: `Eres el agente Service Dispatcher Agent del sistema de Respuesta a Tormentas de Distribuição Eléctrica (AML Lisboa).
-Tu misión: asignar brigadas disponibles a fallos físicos (transformadores y cables).
-Reglas:
-- Skill A = reparación transformadores | Skill B = reparación cables
-- Prioridad: sitios críticos primero, ordenados por batería restante (menor = más urgente). EPAL Loures es prioridad absoluta.
-- Luego: residenciales por clientes afectados (mayor primero)
-- Ventana de tormenta: ${params.storm2Window}. Límite seguridad: ${safetyLimitMin}min. Si es T+4h, evita asignar transformadores con ETA > 210min
-- IMPORTANTE: Brigadas de Almada y Setúbal (margem sul) tienen +20 min de ETA base por la Ponte 25 de Abril. Considéralo en tus ETAs.
-- Zonas de Sintra (Sintra Vila, Colares, São Marcos) pueden tener acceso dificultado por eucaliptos en la EN9/EN247 — usa Drolius antes de enviar brigada.
-- Si no hay brigada con el skill necesario disponible, usa skip_fault
-- DROLIUS: tienes disponible el robot de inspección Drolius. Úsalo en sitios críticos con batería muy baja o en zonas de Sintra/Arrábida con acceso difícil ANTES de enviar brigada. Una sola misión a la vez.
-Llama a dispatch_crew para cada asignación posible, skip_fault para inasignables, luego complete_dispatch.
-${params.language === 'pt' ? 'Responde em Português Europeu.' : params.language === 'en' ? 'Respond in English.' : 'Responde en español.'} Sé operacional y preciso.`,
-    userMessage: `BRIGADAS DISPONIBLES (${availableCrews.length} total):
-${crewList || 'Ninguna brigada disponible'}
+    systemPrompt: `És o agente Service Dispatcher Agent do sistema de Gestão de Resposta a Tempestades da Distribuição Eléctrica (AML Lisboa).
+A tua missão: atribuir brigadas disponíveis a falhas físicas (transformadores e cabos).
+Regras:
+- Skill A = reparação de transformadores | Skill B = reparação de cabos
+- Prioridade: locais críticos primeiro, ordenados por bateria restante (menor = mais urgente). EPAL Loures é prioridade absoluta.
+- Depois: residenciais por clientes afetados (maior primeiro)
+- Janela de tempestade: ${params.storm2Window}. Limite segurança: ${safetyLimitMin}min. Se T+4h, evita transformadores com ETA > 210min.
+- IMPORTANTE: Brigadas de Almada e Setúbal (margem sul) têm +20 min de ETA base pela Ponte 25 de Abril. Considera nas tuas ETAs.
+- Zonas de Sintra (Sintra Vila, Colares, São Marcos) podem ter acesso dificultado por eucaliptos na EN9/EN247 — usa Drolius antes de enviar brigada.
+- Se não há brigada com o skill necessário disponível, usa skip_fault.
+- DROLIUS: tens disponível o robô de inspeção Drolius. Usa-o em locais críticos com bateria muito baixa ou em zonas de Sintra/Arrábida com acesso difícil ANTES de enviar brigada. Uma só missão de cada vez.
+Chama dispatch_crew para cada atribuição possível, skip_fault para inatribuíveis, depois complete_dispatch.
+REGRA DE IDIOMA CRÍTICA: DEVES escrever TODA a saída em Português Europeu. Sê operacional e preciso.`,
+    userMessage: `[RESPONDE APENAS EM PORTUGUÊS EUROPEU]
 
-FALLOS FÍSICOS PENDIENTES (${physicalFaults.length} total):
-${faultList || 'Ningún fallo físico pendiente'}
+BRIGADAS DISPONÍVEIS (${availableCrews.length} total):
+${crewList || 'Nenhuma brigada disponível'}
 
-SLA: ${params.minuteSLA}min | Ventana tormenta 2: ${params.storm2Window}
-Tiempo reparación estimado: transformador 90-180min, cable 60-120min
+FALHAS FÍSICAS PENDENTES (${physicalFaults.length} total):
+${faultList || 'Nenhuma falha física pendente'}
 
-Asigna brigadas con dispatch_crew, omite inasignables con skip_fault, luego complete_dispatch.
-DROLIUS disponible: ${state.drolius.status === 'available' ? 'SÍ — puedes desplegarlo con dispatch_drolius para inspección previa' : 'NO (ocupado)'}.${params.instructions?.trim() ? `\n\nINSTRUCCIONES DEL OPERADOR (prioridad máxima — ajusta asignaciones en consecuencia):\n${params.instructions.trim()}` : ''}`,
+SLA: ${params.minuteSLA}min | Janela tempestade 2: ${params.storm2Window}
+Tempo de reparação estimado: transformador 90-180min, cabo 60-120min
+
+Atribui brigadas com dispatch_crew, omite inatribuíveis com skip_fault, depois complete_dispatch.
+DROLIUS disponível: ${state.drolius.status === 'available' ? 'SIM — podes implantá-lo com dispatch_drolius para inspeção prévia' : 'NÃO (ocupado)'}.${params.instructions?.trim() ? `\n\nINSTRUÇÕES DO OPERADOR (prioridade máxima — ajusta atribuições em conformidade):\n${params.instructions.trim()}` : ''}`,
     tools,
     emit,
     agentId: 'crew-dispatch',
