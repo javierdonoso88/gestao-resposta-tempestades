@@ -173,6 +173,12 @@ export interface Translations {
     sapAssets: string; sapDrolius: string;
     analysisTitle: string; analysisEmpty: string;
     pendingTitle: string;
+    pendingUnresolved: string;
+    mitigationLabel: string;
+    mitigationCritical: string;
+    mitigationTransformer: string;
+    mitigationCable: string;
+    mitigationSwitchable: string;
     urgencyCritical: string; urgencyModerate: string; urgencyLow: string;
     gradOptimal: string; gradAcceptable: string; gradCritical: string;
     pdfTitle: string; pdfKpis: string; pdfOperational: string;
@@ -357,6 +363,12 @@ export const es: Translations = {
     analysisTitle: 'ANÁLISIS ASSET AND SERVICES ASSISTANT',
     analysisEmpty: 'Resumen del orquestrador no disponible.',
     pendingTitle: 'ACCIONES PENDIENTES',
+    pendingUnresolved: 'fallo sin resolver',
+    mitigationLabel: 'Mitigación',
+    mitigationCritical: 'Reasignar brigada con prioridad máxima. Considerar generador móvil como medida inmediata.',
+    mitigationTransformer: 'Asignar brigada con Skill A. Si inventario agotado, activar protocolo de reposición urgente en SAP IBP.',
+    mitigationCable: 'Asignar brigada con Skill B. Valorar rerouting manual de red si hay alimentación alternativa disponible.',
+    mitigationSwitchable: 'Evaluar posibilidad de conmutación manual o ampliar límite de operaciones de telecontrol.',
     urgencyCritical: 'CRÍTICO', urgencyModerate: 'MODERADO', urgencyLow: 'BAJO',
     gradOptimal: 'ÓPTIMO', gradAcceptable: 'ACEPTABLE', gradCritical: 'CRÍTICO',
     pdfTitle: 'Resumen Ejecutivo', pdfKpis: 'KPIs DE MISIÓN',

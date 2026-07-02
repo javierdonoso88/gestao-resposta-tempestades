@@ -138,24 +138,23 @@ function renderMarkdown(raw: string) {
   return nodes;
 }
 
-function getMitigation(fault: Fault): { action: string; urgency: 'high' | 'medium' | 'low' } {
+function getMitigation(fault: Fault, t: ReturnType<typeof import('../i18n').useT>): { action: string; urgency: 'high' | 'medium' | 'low' } {
   if (fault.criticalSite) {
     return {
-      action: `Reasignar brigada con prioridad máxima. ${fault.batteryMinutes != null ? `Batería restante estimada: ${fault.batteryMinutes} min.` : ''} Considerar generador móvil como medida inmediata.`,
+      action: `${t.results.mitigationCritical}${fault.batteryMinutes != null ? ` ${fault.batteryMinutes} min.` : ''}`,
       urgency: 'high',
     };
   }
   if (fault.type === 'transformer') {
-    return { action: 'Asignar brigada con Skill A. Si inventario agotado, activar protocolo de reposición urgente en SAP IBP.', urgency: 'medium' };
+    return { action: t.results.mitigationTransformer, urgency: 'medium' };
   }
   if (fault.type === 'cable') {
-    return { action: 'Asignar brigada con Skill B. Valorar rerouting manual de red si hay alimentación alternativa disponible.', urgency: 'medium' };
+    return { action: t.results.mitigationCable, urgency: 'medium' };
   }
-  return { action: 'Evaluar posibilidad de conmutación manual o ampliar límite de operaciones de telecontrol.', urgency: 'low' };
+  return { action: t.results.mitigationSwitchable, urgency: 'low' };
 }
 
 const URGENCY_COLOR = { high: '#ef4444', medium: '#f97316', low: '#f59e0b' };
-const URGENCY_LABEL = { high: 'CRÍTICO', medium: 'MODERADO', low: 'BAJO' };
 
 function MinuteKpiCard({ label, sublabel, value, thresholds, gradLabels }: { label: string; sublabel: string; value: number | null; thresholds: [number, number]; gradLabels?: [string, string, string] }) {
   const color = value === null ? 'var(--text-ghost)' : value <= thresholds[0] ? '#22c55e' : value <= thresholds[1] ? '#f97316' : '#ef4444';
@@ -379,14 +378,14 @@ export function ResultsOverlay({ faults, totalClients, kpi, agentLogs, commsMess
   ${pendingRows.length > 0 ? `
   <div class="section-label">${t.results.pdfPending} (${pendingRows.length})</div>
   ${pendingRows.map(fault => {
-    const { action, urgency } = getMitigation(fault);
+    const { action, urgency } = getMitigation(fault, t);
     const bg = urgency === 'high' ? '#fee2e2' : urgency === 'medium' ? '#ffedd5' : '#fef9c3';
     const col = urgency === 'high' ? '#dc2626' : urgency === 'medium' ? '#ea580c' : '#ca8a04';
     const lbl = pdfUrgency[urgency];
     return `<div class="pending-row" style="border-color:${col}33">
       <div class="pending-badge" style="background:${bg};color:${col}">${lbl}</div>
       <div style="flex:1">
-        <div class="pending-id">${fault.id} <span style="font-weight:400;color:#64748b;font-size:11px">${fault.zone} · ${faultTypeLabel(fault.type)} · ${fault.affectedClients.toLocaleString('es-ES')} ${clientsWord}${fault.criticalSite ? ` · ${fault.criticalSite}` : ''}</span></div>
+        <div class="pending-id">${fault.id} <span style="font-weight:400;color:#64748b;font-size:11px">${fault.zone} · ${faultTypeLabel(fault.type)} · ${fault.affectedClients.toLocaleString()} ${clientsWord}${fault.criticalSite ? ` · ${fault.criticalSite}` : ''}</span></div>
         <div class="pending-action">${action}</div>
       </div>
     </div>`;
@@ -552,12 +551,12 @@ export function ResultsOverlay({ faults, totalClients, kpi, agentLogs, commsMess
               <div className="flex items-center gap-3 mb-3">
                 <div className="text-[10px] font-bold tracking-widest" style={{ color: 'var(--text-ghost)' }}>{t.results.pendingTitle}</div>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded" style={{ background: 'rgba(249,115,22,0.12)', color: '#f97316', border: '1px solid rgba(249,115,22,0.25)' }}>
-                  {pendingSorted.length} fallo{pendingSorted.length > 1 ? 's' : ''} sin resolver
+                  {pendingSorted.length} {t.results.pendingUnresolved}{pendingSorted.length > 1 ? 's' : ''}
                 </span>
               </div>
               <div className="flex flex-col gap-2">
                 {pendingSorted.map(fault => {
-                  const { action, urgency } = getMitigation(fault);
+                  const { action, urgency } = getMitigation(fault, t);
                   const uColor = URGENCY_COLOR[urgency];
                   return (
                     <div key={fault.id} className="rounded-xl p-4 flex gap-4" style={{ background: 'var(--bg-secondary)', border: `1px solid rgba(${hexToRgb(uColor)},0.25)` }}>
@@ -571,7 +570,7 @@ export function ResultsOverlay({ faults, totalClients, kpi, agentLogs, commsMess
                           <span className="text-xs font-black" style={{ color: 'var(--text-primary)' }}>{fault.id}</span>
                           <span className="text-xs font-mono" style={{ color: 'var(--text-dim)' }}>{fault.zone}</span>
                           <span className="text-xs font-mono" style={{ color: 'var(--text-ghost)' }}>
-                            {fault.type === 'transformer' ? 'Transformador' : fault.type === 'cable' ? 'Cable' : 'Conmutable'} · {fault.affectedClients.toLocaleString('es-ES')} clientes
+                            {fault.type === 'transformer' ? t.map.typeTransformer : fault.type === 'cable' ? t.map.typeCable : t.map.typeSwitchable} · {fault.affectedClients.toLocaleString()} {t.map.tooltipClients.replace(':', '')}
                           </span>
                           {fault.criticalSite && (
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded" style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.25)' }}>
@@ -580,7 +579,7 @@ export function ResultsOverlay({ faults, totalClients, kpi, agentLogs, commsMess
                           )}
                         </div>
                         <p className="text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-                          <span className="font-semibold" style={{ color: 'var(--text-secondary)' }}>Mitigación: </span>{action}
+                          <span className="font-semibold" style={{ color: 'var(--text-secondary)' }}>{t.results.mitigationLabel}: </span>{action}
                         </p>
                       </div>
                     </div>
