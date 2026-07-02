@@ -247,8 +247,8 @@ export function ResultsOverlay({ faults, totalClients, kpi, agentLogs, commsMess
 
     // language-agnostic KPI counters (same logic as main view)
     const pdfFsmActions = actionMessages.filter(a => a.system === 'SAP Field Service Management').length;
-    const pdfIbpMaterials = actionMessages.filter(a => a.system === 'SAP Integrated Business Planning' && !a.msg.toLowerCase().includes('replen') && !a.msg.toLowerCase().includes('reposición')).length;
-    const pdfDrolius = actionMessages.filter(a => a.system === 'Drolius · ANYbotics' && (a.msg.toLowerCase().includes('deployed') || a.msg.toLowerCase().includes('asignado'))).length;
+    const pdfIbpMaterials = actionMessages.filter(a => a.system === 'SAP Integrated Business Planning' && !a.msg.toLowerCase().includes('reposição')).length;
+    const pdfDrolius = actionMessages.filter(a => a.system === 'Drolius · ANYbotics' && a.msg.toLowerCase().includes('implantado')).length;
 
     const pdfGrade = (v: number) => v >= 80 ? t.results.gradOptimal : v >= 60 ? t.results.gradAcceptable : t.results.gradCritical;
     const pdfSafetyGrade = (v: number) => v === 100 ? t.results.gradOptimal : v >= 70 ? t.results.gradAcceptable : t.results.gradCritical;
@@ -423,12 +423,12 @@ export function ResultsOverlay({ faults, totalClients, kpi, agentLogs, commsMess
   // SAP KPIs
   const uniqueSystems = new Set(actionMessages.map(a => a.system)).size;
   const fsmActions = actionMessages.filter(a => a.system === 'SAP Field Service Management').length;
-  const ibpMaterials = actionMessages.filter(a => a.system === 'SAP Integrated Business Planning' && !a.msg.toLowerCase().includes('replen') && !a.msg.toLowerCase().includes('reposición')).length;
-  const ibpReplenish = actionMessages.filter(a => a.system === 'SAP Integrated Business Planning' && (a.msg.toLowerCase().includes('replen') || a.msg.toLowerCase().includes('reposición'))).length;
+  const ibpMaterials = actionMessages.filter(a => a.system === 'SAP Integrated Business Planning' && !a.msg.toLowerCase().includes('reposição')).length;
+  const ibpReplenish = actionMessages.filter(a => a.system === 'SAP Integrated Business Planning' && a.msg.toLowerCase().includes('reposição')).length;
   const cxMessages = commsMessages.length;
   const ainSwitches = restored.length;
   const s4Assets = faults.length;
-  const droliusMissions = actionMessages.filter(a => a.system === 'Drolius · ANYbotics' && (a.msg.toLowerCase().includes('deployed') || a.msg.toLowerCase().includes('asignado'))).length;
+  const droliusMissions = actionMessages.filter(a => a.system === 'Drolius · ANYbotics' && a.msg.toLowerCase().includes('implantado')).length;
 
   // Pending actions sorted: critical first, then by clients desc
   const pendingSorted = [...pending].sort((a, b) => {
