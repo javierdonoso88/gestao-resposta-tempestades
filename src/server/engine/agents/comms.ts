@@ -21,7 +21,7 @@ export async function runComms(
   const tools: ToolDef[] = [
     {
       name: 'send_sms',
-      description: 'Envía SMS masivo a clientes afectados. Máximo 160 caracteres. Debe mencionar EDP Distribuição.',
+      description: 'Envía SMS masivo a clientes afectados. Máximo 160 caracteres. Debe mencionar Distribuição Eléctrica.',
       input_schema: {
         type: 'object' as const,
         properties: {
@@ -103,9 +103,9 @@ export async function runComms(
   ];
 
   await runAgent({
-    systemPrompt: `Eres el agente Communications Insight Agent del sistema de Respuesta a Tormentas de EDP Distribuição (AML Lisboa).
+    systemPrompt: `Eres el agente Communications Insight Agent del sistema de Respuesta a Tormentas de Distribuição Eléctrica (AML Lisboa).
 Tu misión: redactar y enviar 3 comunicaciones obligatorias en este orden:
-1. send_sms: conciso (≤160 chars), menciona EDP Distribuição, número de clientes y tiempo estimado de restauración
+1. send_sms: conciso (≤160 chars), menciona Distribuição Eléctrica, número de clientes y tiempo estimado de restauración
 2. send_press_release: comunicado formal para medios de Lisboa (Público, Expresso, RTP, SIC Notícias, TSF, Rádio Renascença). Redáctalo en portugués europeo.
 3. send_regulatory: notificación técnica formal para ERSE (regulador energético PT) y ANPC (Proteção Civil) con datos del incidente${hadConflict ? '\nIMPORTANTE: Hay conflicto de recursos (material limitado). Menciónalo en la notificación regulatoria.' : ''}${criticalAtRisk.length > 0 ? `\nALERTA: ${criticalAtRisk.length} sitio(s) crítico(s) con batería bajo el umbral SLA. Especialmente EPAL Loures (afecta abastecimiento de agua a 800.000 personas). Menciónalo en la notificación a ERSE y ANPC.` : ''}
 Llama a send_sms, send_press_release y send_regulatory (en ese orden), luego complete_comms.
