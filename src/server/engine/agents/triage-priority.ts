@@ -6,13 +6,13 @@ export async function runTriagePriority(
   state: ScenarioState,
   emit: (e: SimEvent) => void
 ): Promise<AgentResult> {
-  let summary = 'Triage y priorización completados.';
+  let summary = 'Triage e priorização concluídos.';
   const criticalFaultIds: string[] = [];
   const orderedIds: string[] = [];
 
   const faultList = state.faults.map(f =>
     `${f.id} | tipo:${f.type} | zona:${f.zone} | clientes:${f.affectedClients}` +
-    (f.criticalSite ? ` | CRÍTICO:${f.criticalSite} (${f.criticalSiteType}) batería:${f.batteryMinutes ?? 'N/A'}min` : '')
+    (f.criticalSite ? ` | CRÍTICO:${f.criticalSite} (${f.criticalSiteType}) bateria:${f.batteryMinutes ?? 'N/A'}min` : '')
   ).join('\n');
 
   const physicalFaults = state.faults.filter(f =>
@@ -22,62 +22,62 @@ export async function runTriagePriority(
   const tools: ToolDef[] = [
     {
       name: 'classify_fault',
-      description: 'Clasifica un fallo individual por severidad y riesgo crítico.',
+      description: 'Classifica uma falha individual por severidade e risco crítico.',
       input_schema: {
         type: 'object' as const,
         properties: {
-          faultId: { type: 'string', description: 'ID del fallo, e.g. TRF-002' },
+          faultId: { type: 'string', description: 'ID da falha, ex. TRF-002' },
           severity: { type: 'string', enum: ['critical', 'high', 'medium', 'low'] },
-          criticalSite: { type: 'boolean', description: 'Si afecta infraestructura crítica' },
-          batteryRisk: { type: 'boolean', description: 'Si la batería puede agotarse antes del SLA' },
+          criticalSite: { type: 'boolean', description: 'Se afeta infraestrutura crítica' },
+          batteryRisk: { type: 'boolean', description: 'Se a bateria pode esgotar-se antes do SLA' },
         },
         required: ['faultId', 'severity', 'criticalSite', 'batteryRisk'],
       },
       handler: async (input) => {
         const fault = state.faults.find(f => f.id === input.faultId);
-        if (!fault) return `Error: fallo ${input.faultId} no encontrado en el escenario`;
+        if (!fault) return `Erro: falha ${input.faultId} não encontrada no cenário`;
         if (input.criticalSite && !criticalFaultIds.includes(input.faultId as string)) {
           criticalFaultIds.push(input.faultId as string);
         }
-        return `OK: ${input.faultId} clasificado severidad=${input.severity}`;
+        return `OK: ${input.faultId} classificada severidade=${input.severity}`;
       },
     },
     {
       name: 'set_priority',
-      description: 'Asigna un rango de prioridad a un fallo físico (transformador o cable) para el despacho de brigadas.',
+      description: 'Atribui um rank de prioridade a uma falha física (transformador ou cabo) para o despacho de brigadas.',
       input_schema: {
         type: 'object' as const,
         properties: {
-          faultId: { type: 'string', description: 'ID del fallo físico' },
-          rank: { type: 'number', description: 'Número de orden (1 = más urgente)' },
-          reason: { type: 'string', description: 'Justificación de la prioridad asignada' },
-          slaRisk: { type: 'boolean', description: 'Si existe riesgo de incumplimiento del SLA' },
+          faultId: { type: 'string', description: 'ID da falha física' },
+          rank: { type: 'number', description: 'Número de ordem (1 = mais urgente)' },
+          reason: { type: 'string', description: 'Justificação da prioridade atribuída' },
+          slaRisk: { type: 'boolean', description: 'Se existe risco de incumprimento do SLA' },
         },
         required: ['faultId', 'rank', 'reason', 'slaRisk'],
       },
       handler: async (input) => {
         const fault = state.faults.find(f => f.id === input.faultId);
-        if (!fault) return `Error: fallo ${input.faultId} no encontrado`;
+        if (!fault) return `Erro: falha ${input.faultId} não encontrada`;
         if (!orderedIds.includes(input.faultId as string)) {
           orderedIds.push(input.faultId as string);
         }
-        return `OK: ${input.faultId} asignado rango ${input.rank}`;
+        return `OK: ${input.faultId} com rank ${input.rank} atribuído`;
       },
     },
     {
       name: 'complete_assessment',
-      description: 'Finaliza el análisis con resumen ejecutivo de triage y priorización.',
+      description: 'Finaliza a análise com resumo executivo de triage e priorização.',
       input_schema: {
         type: 'object' as const,
         properties: {
-          summary: { type: 'string', description: 'Resumen ejecutivo del análisis completo' },
+          summary: { type: 'string', description: 'Resumo executivo da análise completa' },
         },
         required: ['summary'],
       },
       handler: async (input) => {
         summary = input.summary as string;
         emit({ type: 'action', agent: 'triage-priority', system: 'SAP S/4HANA Asset Management + Event Mesh', msg: `${state.faults.length} ativos analisados — ${criticalFaultIds.length} locais críticos, ${orderedIds.length} falhas físicas ordenadas` });
-        return 'Análisis completado.';
+        return 'Análise concluída.';
       },
     },
   ];

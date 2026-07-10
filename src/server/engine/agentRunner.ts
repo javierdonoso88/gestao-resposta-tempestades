@@ -74,7 +74,7 @@ export async function runAgent(opts: {
       let result: string;
 
       if (!handler) {
-        result = `Error: unknown tool "${block.name}"`;
+        result = `Erro: ferramenta desconhecida "${block.name}"`;
       } else {
         try {
           result = await handler(block.input as Record<string, unknown>);

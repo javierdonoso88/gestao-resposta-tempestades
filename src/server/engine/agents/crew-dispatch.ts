@@ -6,7 +6,7 @@ export async function runCrewDispatch(
   state: ScenarioState,
   emit: (e: SimEvent) => void
 ): Promise<AgentResult> {
-  let summary = 'Despacho de brigadas completado.';
+  let summary = 'Despacho de brigadas concluído.';
   const dispatches: { crewId: string; faultId: string }[] = [];
 
   const availableCrews = state.crews.filter(c => c.status === 'available');
@@ -20,7 +20,7 @@ export async function runCrewDispatch(
 
   const faultList = physicalFaults.map(f =>
     `${f.id} | tipo:${f.type} | zona:${f.zone} | clientes:${f.affectedClients}` +
-    (f.criticalSite ? ` | CRÍTICO:${f.criticalSite} (${f.criticalSiteType}) batería:${f.batteryMinutes ?? 'N/A'}min` : '')
+    (f.criticalSite ? ` | CRÍTICO:${f.criticalSite} (${f.criticalSiteType}) bateria:${f.batteryMinutes ?? 'N/A'}min` : '')
   ).join('\n');
 
   const safetyLimitMin = params.storm2Window === 'T+4h' ? 240
@@ -31,24 +31,24 @@ export async function runCrewDispatch(
   const tools: ToolDef[] = [
     {
       name: 'dispatch_crew',
-      description: 'Despacha una brigada a un fallo físico para reparación.',
+      description: 'Despacha uma brigada para uma falha física para reparação.',
       input_schema: {
         type: 'object' as const,
         properties: {
-          crewId: { type: 'string', description: 'ID de la brigada (ej: B-01)' },
-          faultId: { type: 'string', description: 'ID del fallo físico (ej: TRF-001)' },
-          eta: { type: 'number', description: 'ETA estimada en minutos' },
-          reason: { type: 'string', description: 'Justificación del despacho' },
+          crewId: { type: 'string', description: 'ID da brigada (ex: LIS-01)' },
+          faultId: { type: 'string', description: 'ID da falha física (ex: TRF-001)' },
+          eta: { type: 'number', description: 'ETA estimado em minutos' },
+          reason: { type: 'string', description: 'Justificação do despacho' },
         },
         required: ['crewId', 'faultId', 'eta', 'reason'],
       },
       handler: async (input) => {
         const crew = state.crews.find(c => c.id === input.crewId);
         const fault = state.faults.find(f => f.id === input.faultId);
-        if (!crew) return `Error: brigada ${input.crewId} no encontrada`;
-        if (!fault) return `Error: fallo ${input.faultId} no encontrado`;
-        if (crew.status !== 'available') return `Error: brigada ${input.crewId} no disponible (estado: ${crew.status})`;
-        if (fault.status !== 'fault') return `Error: fallo ${input.faultId} ya en proceso (estado: ${fault.status})`;
+        if (!crew) return `Erro: brigada ${input.crewId} não encontrada`;
+        if (!fault) return `Erro: falha ${input.faultId} não encontrada`;
+        if (crew.status !== 'available') return `Erro: brigada ${input.crewId} não disponível (estado: ${crew.status})`;
+        if (fault.status !== 'fault') return `Erro: falha ${input.faultId} já em processo (estado: ${fault.status})`;
         crew.status = 'busy';
         crew.currentTask = input.faultId as string;
         fault.status = 'crew-en-route';
@@ -60,25 +60,25 @@ export async function runCrewDispatch(
     },
     {
       name: 'dispatch_drolius',
-      description: 'Despliega a Drolius (robot canino de inspección) a una zona de fallo para obtener datos en tiempo real: estado de la batería SAI, accesibilidad de la zona y evaluación de daños. Especialmente útil antes de enviar brigada a zonas peligrosas o con batería crítica. Solo disponible si Drolius no está ya desplegado.',
+      description: 'Implanta o Drolius (robô de inspeção) numa zona de falha para obter dados em tempo real: estado da bateria UPS, acessibilidade da zona e avaliação de danos. Especialmente útil antes de enviar brigada a zonas perigosas ou com bateria crítica. Só disponível se o Drolius não estiver já implantado.',
       input_schema: {
         type: 'object' as const,
         properties: {
-          faultId: { type: 'string', description: 'ID del fallo a inspeccionar' },
+          faultId: { type: 'string', description: 'ID da falha a inspecionar' },
           mission: {
             type: 'string',
             enum: ['battery_check', 'zone_access', 'damage_assessment'],
-            description: 'Tipo de misión: battery_check = confirmar batería SAI restante; zone_access = evaluar accesibilidad para brigada; damage_assessment = evaluar daños físicos en el activo',
+            description: 'Tipo de missão: battery_check = confirmar bateria UPS restante; zone_access = avaliar acessibilidade para brigada; damage_assessment = avaliar danos físicos no ativo',
           },
         },
         required: ['faultId', 'mission'],
       },
       handler: async (input) => {
         if (state.drolius.status !== 'available') {
-          return `Error: Drolius no disponible — actualmente asignado en campo en ${state.drolius.currentTask}`;
+          return `Erro: Drolius não disponível — atualmente implantado no campo em ${state.drolius.currentTask}`;
         }
         const fault = state.faults.find(f => f.id === input.faultId);
-        if (!fault) return `Error: fallo ${input.faultId} no encontrado`;
+        if (!fault) return `Erro: falha ${input.faultId} não encontrada`;
 
         state.drolius.status = 'deployed';
         state.drolius.currentTask = input.faultId as string;
@@ -95,26 +95,26 @@ export async function runCrewDispatch(
     },
     {
       name: 'skip_fault',
-      description: 'Marca un fallo como no asignable en este ciclo (sin brigada disponible o ventana insuficiente).',
+      description: 'Marca uma falha como não atribuível neste ciclo (sem brigada disponível ou janela insuficiente).',
       input_schema: {
         type: 'object' as const,
         properties: {
-          faultId: { type: 'string', description: 'ID del fallo a omitir' },
-          reason: { type: 'string', description: 'Motivo por el que no se puede asignar' },
+          faultId: { type: 'string', description: 'ID da falha a omitir' },
+          reason: { type: 'string', description: 'Motivo pelo qual não pode ser atribuída' },
         },
         required: ['faultId', 'reason'],
       },
       handler: async (input) => {
-        return `OK: ${input.faultId} registrado sin asignar — ${input.reason}`;
+        return `OK: ${input.faultId} registada sem atribuição — ${input.reason}`;
       },
     },
     {
       name: 'complete_dispatch',
-      description: 'Finaliza el despacho de brigadas con resumen ejecutivo.',
+      description: 'Finaliza o despacho de brigadas com resumo executivo.',
       input_schema: {
         type: 'object' as const,
         properties: {
-          summary: { type: 'string', description: 'Resumen del despacho de brigadas' },
+          summary: { type: 'string', description: 'Resumo do despacho de brigadas' },
         },
         required: ['summary'],
       },
@@ -174,33 +174,33 @@ function buildDroliusReport(fault: Fault, mission: string): string {
   const id = fault.id;
 
   const ACCESS_CONDITIONS = fault.batteryMinutes !== undefined && fault.batteryMinutes <= 60
-    ? 'zona parcialmente inundada — agua 15-20 cm en acceso principal. Requiere calzado de protección y EPI nivel 2.'
-    : 'zona accesible — sin obstáculos significativos. Condiciones: pavimento mojado, visibilidad reducida por lluvia.';
+    ? 'zona parcialmente inundada — água 15-20 cm no acesso principal. Requer calçado de proteção e EPI nível 2.'
+    : 'zona acessível — sem obstáculos significativos. Condições: pavimento molhado, visibilidade reduzida pela chuva.';
 
   if (mission === 'battery_check' && fault.criticalSite) {
     const remaining = fault.batteryMinutes ?? 0;
     const tempC = 68 + (remaining % 30);
-    return `[DROLIUS INFORME — ${id} · ${fault.criticalSite}] ` +
-      `Batería SAI confirmada: ${remaining} min restantes (lectura directa del BMS). ` +
-      `Temperatura transformador: ${tempC}°C — dentro de margen operativo. ` +
-      `Estado bypass: activo. Carga actual: ${55 + (remaining % 40)}% capacidad nominal. ` +
-      `Recomendación: prioridad ${remaining <= 60 ? 'CRÍTICA — brigada inmediata' : 'alta — brigada en < 90 min'}.`;
+    return `[DROLIUS RELATÓRIO — ${id} · ${fault.criticalSite}] ` +
+      `Bateria UPS confirmada: ${remaining} min restantes (leitura direta do BMS). ` +
+      `Temperatura do transformador: ${tempC}°C — dentro da margem operacional. ` +
+      `Estado bypass: ativo. Carga atual: ${55 + (remaining % 40)}% da capacidade nominal. ` +
+      `Recomendação: prioridade ${remaining <= 60 ? 'CRÍTICA — brigada imediata' : 'alta — brigada em < 90 min'}.`;
   }
 
   if (mission === 'zone_access') {
-    return `[DROLIUS INFORME ACCESO — ${id} · ${zone}] ` +
+    return `[DROLIUS RELATÓRIO ACESSO — ${id} · ${zone}] ` +
       `${ACCESS_CONDITIONS} ` +
-      `Ruta alternativa disponible por vía secundaria (+12 min de ETA). ` +
-      `Obstáculos detectados: ${fault.type === 'transformer' ? 'árbol caído a 30 m del activo — motosierra necesaria' : 'derribo de panel de señalización — despejable manualmente'}. ` +
-      `Estimación ETA brigada ajustada: ${fault.type === 'transformer' ? '+20 min sobre ETA nominal' : '+8 min sobre ETA nominal'}.`;
+      `Rota alternativa disponível por via secundária (+12 min de ETA). ` +
+      `Obstáculos detetados: ${fault.type === 'transformer' ? 'eucalipto caído a 30 m do ativo — motosserra necessária' : 'queda de sinalização — removível manualmente'}. ` +
+      `Estimativa ETA brigada ajustada: ${fault.type === 'transformer' ? '+20 min sobre ETA nominal' : '+8 min sobre ETA nominal'}.`;
   }
 
   // damage_assessment
   const damageDesc = fault.type === 'transformer'
-    ? 'Impacto de rayo confirmado en devanado primario. Aislante exterior con quemaduras visibles. Requiere sustitución completa del equipo. Confirmado: Skill A obligatorio.'
-    : `Rotura de conductor en ${Math.floor(Math.random() * 3) + 1} punto(s). Longitud afectada estimada: ${20 + (fault.affectedClients % 50)} m. Requiere ${Math.ceil(fault.affectedClients / 1500)} bobina(s) de cable.`;
+    ? 'Impacto de raio confirmado no enrolamento primário. Isolante exterior com queimaduras visíveis. Requer substituição completa do equipamento. Confirmado: Skill A obrigatório.'
+    : `Rotura de condutor em ${Math.floor(Math.random() * 3) + 1} ponto(s). Comprimento afetado estimado: ${20 + (fault.affectedClients % 50)} m. Requer ${Math.ceil(fault.affectedClients / 1500)} bobina(s) de cabo.`;
 
-  return `[DROLIUS INFORME DAÑOS — ${id} · ${zone}] ${damageDesc} ` +
-    `Nivel de seguridad zona: ${fault.batteryMinutes !== undefined && fault.batteryMinutes <= 60 ? 'ALTO RIESGO — presencia de alta tensión cercana' : 'MEDIO — proceder con EPI estándar'}. ` +
-    `ETA reparación estimada: ${fault.type === 'transformer' ? '120-180 min' : '60-100 min'}.`;
+  return `[DROLIUS RELATÓRIO DANOS — ${id} · ${zone}] ${damageDesc} ` +
+    `Nível de segurança da zona: ${fault.batteryMinutes !== undefined && fault.batteryMinutes <= 60 ? 'ALTO RISCO — presença de alta tensão próxima' : 'MÉDIO — proceder com EPI padrão'}. ` +
+    `ETA reparação estimada: ${fault.type === 'transformer' ? '120-180 min' : '60-100 min'}.`;
 }

@@ -6,7 +6,7 @@ export async function runRerouting(
   state: ScenarioState,
   emit: (e: SimEvent) => void
 ): Promise<AgentResult> {
-  let summary = 'Rerouting completado.';
+  let summary = 'Restauração remota concluída.';
   const restoredFaultIds: string[] = [];
   let switchCount = 0;
 
@@ -19,22 +19,22 @@ export async function runRerouting(
   const tools: ToolDef[] = [
     {
       name: 'attempt_remote_switch',
-      description: 'Ejecuta una conmutación remota (telecontrol) para restaurar suministro en un fallo conmutable.',
+      description: 'Executa uma comutação remota (telecomando) para restaurar fornecimento numa falha comutável.',
       input_schema: {
         type: 'object' as const,
         properties: {
-          faultId: { type: 'string', description: 'ID del fallo conmutable a restaurar' },
+          faultId: { type: 'string', description: 'ID da falha comutável a restaurar' },
         },
         required: ['faultId'],
       },
       handler: async (input) => {
         if (switchCount >= params.switchableFaults) {
-          return `Error: límite de operaciones de telecontrol alcanzado (${params.switchableFaults})`;
+          return `Erro: limite de operações de telecomando atingido (${params.switchableFaults})`;
         }
         const fault = state.faults.find(f => f.id === input.faultId);
-        if (!fault) return `Error: fallo ${input.faultId} no encontrado`;
-        if (fault.type !== 'switchable') return `Error: ${input.faultId} no es conmutable`;
-        if (fault.status !== 'fault') return `Error: ${input.faultId} ya procesado (estado: ${fault.status})`;
+        if (!fault) return `Erro: falha ${input.faultId} não encontrada`;
+        if (fault.type !== 'switchable') return `Erro: ${input.faultId} não é comutável`;
+        if (fault.status !== 'fault') return `Erro: ${input.faultId} já processada (estado: ${fault.status})`;
 
         switchCount++;
         fault.status = 'switching';
@@ -49,17 +49,17 @@ export async function runRerouting(
     },
     {
       name: 'complete_rerouting',
-      description: 'Finaliza el rerouting con resumen de operaciones.',
+      description: 'Finaliza a restauração remota com resumo de operações.',
       input_schema: {
         type: 'object' as const,
         properties: {
-          summary: { type: 'string', description: 'Resumen de operaciones de conmutación' },
+          summary: { type: 'string', description: 'Resumo de operações de comutação' },
         },
         required: ['summary'],
       },
       handler: async (input) => {
         summary = input.summary as string;
-        return 'Rerouting finalizado.';
+        return 'Restauração remota finalizada.';
       },
     },
   ];

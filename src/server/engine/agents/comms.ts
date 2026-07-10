@@ -7,7 +7,7 @@ export async function runComms(
   hadConflict: boolean,
   emit: (e: SimEvent) => void
 ): Promise<AgentResult> {
-  let summary = 'Comunicaciones enviadas.';
+  let summary = 'Comunicações enviadas.';
   const commsMessages: { channel: 'sms' | 'press' | 'regulatory'; msg: string }[] = [];
 
   const restoredFaults = state.faults.filter(f => f.status === 'restored');
@@ -21,11 +21,11 @@ export async function runComms(
   const tools: ToolDef[] = [
     {
       name: 'send_sms',
-      description: 'Envía SMS masivo a clientes afectados. Máximo 160 caracteres. Debe mencionar Distribuição Eléctrica.',
+      description: 'Envia SMS em massa aos clientes afetados. Máximo 160 caracteres. Deve mencionar Distribuição Eléctrica.',
       input_schema: {
         type: 'object' as const,
         properties: {
-          text: { type: 'string', description: 'Texto del SMS (máx 160 chars)' },
+          text: { type: 'string', description: 'Texto do SMS (máx 160 chars)' },
         },
         required: ['text'],
       },
@@ -39,11 +39,11 @@ export async function runComms(
     },
     {
       name: 'send_press_release',
-      description: 'Publica nota de prensa / comunicado para medios de comunicación locales de Lisboa.',
+      description: 'Publica comunicado de imprensa para media local de Lisboa.',
       input_schema: {
         type: 'object' as const,
         properties: {
-          text: { type: 'string', description: 'Texto de la nota de prensa' },
+          text: { type: 'string', description: 'Texto do comunicado de imprensa' },
         },
         required: ['text'],
       },
@@ -57,11 +57,11 @@ export async function runComms(
     },
     {
       name: 'send_regulatory',
-      description: 'Envía notificación formal al regulador ERSE y a la Proteção Civil (ANPC) sobre el incidente.',
+      description: 'Envia notificação formal ao regulador ERSE e à Proteção Civil (ANPC) sobre o incidente.',
       input_schema: {
         type: 'object' as const,
         properties: {
-          text: { type: 'string', description: 'Texto de la notificación regulatoria' },
+          text: { type: 'string', description: 'Texto da notificação regulatória' },
         },
         required: ['text'],
       },
@@ -75,17 +75,17 @@ export async function runComms(
     },
     {
       name: 'complete_comms',
-      description: 'Finaliza el ciclo de comunicaciones.',
+      description: 'Finaliza o ciclo de comunicações.',
       input_schema: {
         type: 'object' as const,
         properties: {
-          summary: { type: 'string', description: 'Resumen de comunicaciones enviadas' },
+          summary: { type: 'string', description: 'Resumo das comunicações enviadas' },
         },
         required: ['summary'],
       },
       handler: async (input) => {
         summary = input.summary as string;
-        return 'Comunicaciones finalizadas.';
+        return 'Comunicações finalizadas.';
       },
     },
   ];

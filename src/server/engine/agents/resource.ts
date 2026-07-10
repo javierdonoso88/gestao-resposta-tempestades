@@ -6,7 +6,7 @@ export async function runResource(
   state: ScenarioState,
   emit: (e: SimEvent) => void
 ): Promise<AgentResult & { hadConflict: boolean }> {
-  let summary = 'Gestión de recursos completada.';
+  let summary = 'Gestão de recursos concluída.';
   let hadConflict = false;
 
   const deployedFaults = state.faults.filter(f => f.status === 'crew-en-route');
@@ -21,31 +21,31 @@ export async function runResource(
   const tools: ToolDef[] = [
     {
       name: 'allocate_resource',
-      description: 'Asigna un recurso material a un fallo (consume inventario).',
+      description: 'Atribui um recurso material a uma falha (consome inventário).',
       input_schema: {
         type: 'object' as const,
         properties: {
-          faultId: { type: 'string', description: 'ID del fallo' },
+          faultId: { type: 'string', description: 'ID da falha' },
           resourceType: {
             type: 'string',
             enum: ['transformer', 'cable', 'mobile_generator'],
-            description: 'Tipo de recurso a asignar',
+            description: 'Tipo de recurso a atribuir',
           },
         },
         required: ['faultId', 'resourceType'],
       },
       handler: async (input) => {
         const fault = state.faults.find(f => f.id === input.faultId);
-        if (!fault) return `Error: fallo ${input.faultId} no encontrado`;
+        if (!fault) return `Erro: falha ${input.faultId} não encontrada`;
         const rt = input.resourceType as string;
         if (rt === 'transformer' && state.inventory.transformers <= 0) {
-          return `Error: sin transformadores en inventario (disponibles: 0)`;
+          return `Erro: sem transformadores em inventário (disponíveis: 0)`;
         }
         if (rt === 'cable' && state.inventory.cables <= 0) {
-          return `Error: sin cables en inventario (disponibles: 0)`;
+          return `Erro: sem cabos em inventário (disponíveis: 0)`;
         }
         if (rt === 'mobile_generator' && state.inventory.mobileGenerators <= 0) {
-          return `Error: sin generadores móviles en inventario (disponibles: 0)`;
+          return `Erro: sem geradores móveis em inventário (disponíveis: 0)`;
         }
         if (rt === 'transformer') state.inventory.transformers--;
         else if (rt === 'cable') state.inventory.cables--;
@@ -58,12 +58,12 @@ export async function runResource(
     },
     {
       name: 'flag_conflict',
-      description: 'Registra conflicto de recursos: material insuficiente. Technician Briefing Agent siempre prevalece — sitios críticos tienen prioridad.',
+      description: 'Regista conflito de recursos: material insuficiente. Technician Briefing Agent prevalece sempre — locais críticos têm prioridade.',
       input_schema: {
         type: 'object' as const,
         properties: {
-          faultId: { type: 'string', description: 'ID del fallo afectado por el déficit' },
-          reason: { type: 'string', description: 'Descripción del conflicto de material' },
+          faultId: { type: 'string', description: 'ID da falha afetada pelo défice' },
+          reason: { type: 'string', description: 'Descrição do conflito de material' },
         },
         required: ['faultId', 'reason'],
       },
@@ -81,17 +81,17 @@ export async function runResource(
     },
     {
       name: 'complete_resources',
-      description: 'Finaliza la gestión de recursos con resumen ejecutivo.',
+      description: 'Finaliza a gestão de recursos com resumo executivo.',
       input_schema: {
         type: 'object' as const,
         properties: {
-          summary: { type: 'string', description: 'Resumen de la gestión de recursos' },
+          summary: { type: 'string', description: 'Resumo da gestão de recursos' },
         },
         required: ['summary'],
       },
       handler: async (input) => {
         summary = input.summary as string;
-        return 'Gestión de recursos finalizada.';
+        return 'Gestão de recursos finalizada.';
       },
     },
   ];

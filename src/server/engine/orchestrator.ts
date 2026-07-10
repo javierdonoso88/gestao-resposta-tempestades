@@ -46,9 +46,9 @@ export async function runOrchestrator(params: SimParams, emit: (e: SimEvent) => 
     try {
       const result = await runTriagePriority(params, state, emit);
       emit({ type: 'agent_done', agent: 'triage-priority', summary: result.summary });
-      return `Technician Briefing Agent completado: ${result.summary}`;
+      return `Technician Briefing Agent concluído: ${result.summary}`;
     } catch (err) {
-      const msg = `Error en triage-priority: ${String(err)}`;
+      const msg = `Erro no triage-priority: ${String(err)}`;
       emit({ type: 'agent_done', agent: 'triage-priority', summary: msg });
       return msg;
     }
@@ -59,9 +59,9 @@ export async function runOrchestrator(params: SimParams, emit: (e: SimEvent) => 
     try {
       const result = await runRerouting(params, state, emit);
       emit({ type: 'agent_done', agent: 'rerouting', summary: result.summary });
-      return `Rerouting completado: ${result.summary}`;
+      return `Remote Restoration SCADA Agent concluído: ${result.summary}`;
     } catch (err) {
-      const msg = `Error en rerouting: ${String(err)}`;
+      const msg = `Erro no rerouting: ${String(err)}`;
       emit({ type: 'agent_done', agent: 'rerouting', summary: msg });
       return msg;
     }
@@ -72,9 +72,9 @@ export async function runOrchestrator(params: SimParams, emit: (e: SimEvent) => 
     try {
       const result = await runCrewDispatch(params, state, emit);
       emit({ type: 'agent_done', agent: 'crew-dispatch', summary: result.summary });
-      return `Crew-dispatch completado: ${result.summary}`;
+      return `Service Dispatcher Agent concluído: ${result.summary}`;
     } catch (err) {
-      const msg = `Error en crew-dispatch: ${String(err)}`;
+      const msg = `Erro no crew-dispatch: ${String(err)}`;
       emit({ type: 'agent_done', agent: 'crew-dispatch', summary: msg });
       return msg;
     }
@@ -86,9 +86,9 @@ export async function runOrchestrator(params: SimParams, emit: (e: SimEvent) => 
       const result = await runResource(params, state, emit);
       hadConflict = result.hadConflict;
       emit({ type: 'agent_done', agent: 'resource', summary: result.summary });
-      return `Resource completado: ${result.summary}`;
+      return `Resource Capacity Shortage Agent concluído: ${result.summary}`;
     } catch (err) {
-      const msg = `Error en resource: ${String(err)}`;
+      const msg = `Erro no resource: ${String(err)}`;
       emit({ type: 'agent_done', agent: 'resource', summary: msg });
       return msg;
     }
@@ -99,9 +99,9 @@ export async function runOrchestrator(params: SimParams, emit: (e: SimEvent) => 
     try {
       const result = await runComms(params, state, hadConflict, emit);
       emit({ type: 'agent_done', agent: 'comms', summary: result.summary });
-      return `Comms completado: ${result.summary}`;
+      return `Communications Insight Agent concluído: ${result.summary}`;
     } catch (err) {
-      const msg = `Error en comms: ${String(err)}`;
+      const msg = `Erro no comms: ${String(err)}`;
       emit({ type: 'agent_done', agent: 'comms', summary: msg });
       return msg;
     }
@@ -146,38 +146,38 @@ export async function runOrchestrator(params: SimParams, emit: (e: SimEvent) => 
     emit({ type: 'kpi', sla: slaScore, safety: safetyScore, efficiency: efficiencyScore, tiepi: tiepiValue, mttr: mttrValue });
     emit({ type: 'action', agent: 'orchestrator', system: 'SAP AI Core Orchestration', msg: `Ciclo encerrado em AI Core — KPIs: SLA ${slaScore}%, Segurança ${safetyScore}%, Eficiência ${efficiencyScore}%, TIEPI ${tiepiValue} min, MTTR ${mttrValue} min` });
     emit({ type: 'done', elapsed: simTime(Date.now() - startTime) });
-    return `Misión finalizada. KPIs: SLA=${slaScore}%, Seguridad=${safetyScore}%, Eficiencia=${efficiencyScore}%, TIEPI=${tiepiValue}min, MTTR=${mttrValue}min`;
+    return `Missão finalizada. KPIs: SLA=${slaScore}%, Segurança=${safetyScore}%, Eficiência=${efficiencyScore}%, TIEPI=${tiepiValue}min, MTTR=${mttrValue}min`;
   });
 
   const sdkTools: Anthropic.Tool[] = [
     {
       name: 'invoke_triage_priority',
-      description: 'Ejecuta Technician Briefing Agent: clasifica todos los fallos por severidad y rankea los físicos por urgencia.',
+      description: 'Executa Technician Briefing Agent: classifica todas as falhas por severidade e ordena as físicas por urgência.',
       input_schema: { type: 'object', properties: {}, required: [] },
     },
     {
       name: 'invoke_rerouting',
-      description: 'Ejecuta Remote Restoration Scada Agent: restaura fallos conmutables por telecontrol remoto.',
+      description: 'Executa Remote Restoration SCADA Agent: restaura falhas comutáveis por telecomando remoto.',
       input_schema: { type: 'object', properties: {}, required: [] },
     },
     {
       name: 'invoke_crew_dispatch',
-      description: 'Ejecuta Service Dispatcher Agent: asigna brigadas a fallos físicos pendientes.',
+      description: 'Executa Service Dispatcher Agent: atribui brigadas a falhas físicas pendentes.',
       input_schema: { type: 'object', properties: {}, required: [] },
     },
     {
       name: 'invoke_resource',
-      description: 'Ejecuta Resource Capacity Shortage Agent: gestiona inventario y detecta conflictos de material.',
+      description: 'Executa Resource Capacity Shortage Agent: gere inventário e deteta conflitos de material.',
       input_schema: { type: 'object', properties: {}, required: [] },
     },
     {
       name: 'invoke_comms',
-      description: 'Ejecuta Communications Insight Agent: redacta y envía SMS, nota de prensa y notificación regulatoria.',
+      description: 'Executa Communications Insight Agent: redige e envia SMS, comunicado de imprensa e notificação regulatória.',
       input_schema: { type: 'object', properties: {}, required: [] },
     },
     {
       name: 'finalize',
-      description: 'Finaliza la misión: calcula KPIs y cierra el ciclo de respuesta.',
+      description: 'Finaliza a missão: calcula KPIs e encerra o ciclo de resposta.',
       input_schema: { type: 'object', properties: {}, required: [] },
     },
   ];
@@ -258,12 +258,12 @@ Inicia o protocolo: chama invoke_triage_priority + invoke_rerouting no MESMO tur
             const handler = handlers.get(block.name);
             let result: string;
             if (!handler) {
-              result = `Error: herramienta desconocida "${block.name}"`;
+              result = `Erro: ferramenta desconhecida "${block.name}"`;
             } else {
               try {
                 result = await handler();
               } catch (err) {
-                result = `Error ejecutando ${block.name}: ${String(err)}`;
+                result = `Erro ao executar ${block.name}: ${String(err)}`;
               }
             }
             return { type: 'tool_result' as const, tool_use_id: block.id, content: result };
@@ -280,7 +280,7 @@ Inicia o protocolo: chama invoke_triage_priority + invoke_rerouting no MESMO tur
             try {
               result = await handler();
             } catch (err) {
-              result = `Error ejecutando ${block.name}: ${String(err)}`;
+              result = `Erro ao executar ${block.name}: ${String(err)}`;
             }
           }
           toolResults.push({ type: 'tool_result', tool_use_id: block.id, content: result });
